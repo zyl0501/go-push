@@ -1,0 +1,33 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "RK6kz3Q9OS6uHkkLVEprb1lUOMI=",
+			"path": "github.com/alecthomas/log4go",
+			"revision": "a9cdec6a8ef5b02d7e1b8dd0782d34c62648f07d",
+			"revisionTime": "2017-09-20T10:20:43Z",
+			"version": "=master",
+			"versionExact": "master"
+		},
+		{
+			"path": "github.com/golang/glog",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "VBJYyFeRE7Bt4zgs4LxnuZqxgcE=",
+			"path": "github.com/google/logger",
+			"revision": "8fe7758b4c5f42c3df32b77c5c2bc3ccd65ea257",
+			"revisionTime": "2017-10-24T20:06:56Z"
+		},
+		{
+			"path": "golang.org/x/sys/windows",
+			"revision": ""
+		},
+		{
+			"path": "golang.org/x/sys/windows/svc/eventlog",
+			"revision": ""
+		}
+	],
+	"rootPath": "github.com/zyl0501/go-push"
+}
