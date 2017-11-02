@@ -1,29 +1,27 @@
 package api
 
-const(
-	STATUS_NEW byte = 0
-	STATUS_CONNECTED byte = 1
+import "net"
+
+const (
+	STATUS_NEW          byte = 0
+	STATUS_CONNECTED    byte = 1
 	STATUS_DISCONNECTED byte = 2
 )
 
 type Connection interface {
-	Init()
-
+	Init(conn *net.Conn)
+	GetId() string
 	IsConnected() bool
+	IsReadTimeout() bool
+	IsWriteTimeout() bool
+	Close()
 }
 
 type ConnectionManager interface {
-
-
-	Connection get(Channel channel);
-
-Connection removeAndClose(Channel channel);
-
-void add(Connection connection);
-
-int getConnNum();
-
-void init();
-
-void destroy();
+	Init()
+	Add(connection Connection)
+	Get(id string) Connection
+	RemoveAndClose(id string) Connection
+	GetConnNum() int
+	Destroy()
 }

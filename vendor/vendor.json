@@ -21,6 +21,12 @@
 			"revisionTime": "2017-10-24T20:06:56Z"
 		},
 		{
+			"checksumSHA1": "P1IAhpaqFMX/Z6GLa9QLisoSIf0=",
+			"path": "github.com/orcaman/concurrent-map",
+			"revision": "d4c23bd0e01134806215ffe65ba3fd22ec6721f7",
+			"revisionTime": "2017-10-24T15:42:51Z"
+		},
+		{
 			"path": "golang.org/x/sys/windows",
 			"revision": ""
 		},
