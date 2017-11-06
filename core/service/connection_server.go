@@ -14,26 +14,27 @@ import (
 )
 
 type ConnectionServer struct {
-	server            service.BaseServer
+	baseServer        service.BaseServer
 	connManager       connection.ServerConnectionManager
 	messageDispatcher common.MessageDispatcher
 }
 
 func NewConnectionServer() (server ConnectionServer) {
 	return ConnectionServer{
-		server:            service.BaseServer{},
+		baseServer:        service.BaseServer{},
 		connManager:       connection.NewConnectionManager(),
 		messageDispatcher: common.NewMessageDispatcher(),
 	}
 }
 
 func (server *ConnectionServer) Start(listener service.Listener) {
-	server.server.Start(listener)
+	server.baseServer.Start(listener)
 	server.listen()
 }
 
 func (server *ConnectionServer) Stop(listener service.Listener) {
-	server.server.Stop(listener)
+	server.baseServer.Stop(listener)
+	server.connManager.Destroy()
 }
 
 func (server *ConnectionServer) SyncStart() (success bool) {
@@ -45,7 +46,7 @@ func (server *ConnectionServer) SyncStop() (success bool) {
 }
 
 func (server *ConnectionServer) Init() {
-	server.server.Init()
+	server.baseServer.Init()
 	server.connManager.Init()
 	server.messageDispatcher.Register(protocol.HANDSHAKE, handler.HandshakeHandler{})
 }
@@ -60,7 +61,7 @@ func (server *ConnectionServer) listen() {
 		log.Error(os.Stderr, "Fatal error: %s", err.Error())
 		os.Exit(1)
 	}
-	defer log.Info("server exit")
+	defer log.Info("baseServer exit")
 	defer netListen.Close()
 
 	log.Info("Wait for Client")
@@ -90,7 +91,7 @@ func (server *ConnectionServer) handlerMessage(conn net.Conn) {
 }
 
 func decodeJson(content []byte) (packet protocol.Packet) {
-	packet = protocol.Packet{}
+	packet = protocol.Packet{Cmd: protocol.UNKNOWN}
 	json.Unmarshal(content, &packet)
 	return packet
 }

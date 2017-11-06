@@ -23,3 +23,8 @@ func (pushServer *MPushServer) Start() {
 	var listener api.Listener
 	pushServer.ConnectionServer.Start(listener)
 }
+
+func (pushServer *MPushServer) Stop() {
+	var listener api.Listener
+	pushServer.ConnectionServer.Stop(listener)
+}

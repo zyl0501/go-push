@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 )
 
-
 func main() {
 	config.InitConfig()
 	server := "localhost:9933"
@@ -31,8 +30,8 @@ func main() {
 }
 
 func sender(conn net.TCPConn) {
-	packet := protocol.Packet{Cmd:protocol.HANDSHAKE}
-	words,_ := json.Marshal(packet)
+	packet := protocol.Packet{Cmd: protocol.HANDSHAKE}
+	words, _ := json.Marshal(packet)
 	conn.Write([]byte(words))
 	fmt.Println("send over", string(words[:]))
 }

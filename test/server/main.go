@@ -8,4 +8,5 @@ func main() {
 	server:= core.NewPushServer()
 	server.Init()
 	server.Start()
+	defer server.Stop()
 }
