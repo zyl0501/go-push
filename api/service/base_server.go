@@ -1,25 +1,31 @@
 package service
 
 type BaseServer struct {
-	Server Server
 }
 
 func (server *BaseServer) Start(listener Listener) {
-	listener.OnSuccess("start success")
+	if listener != nil {
+		listener.OnSuccess("start success")
+	}
 }
 
 func (server *BaseServer) Stop(listener Listener) {
-	listener.OnSuccess("stop success")
+	if listener != nil {
+		listener.OnSuccess("stop success")
+	}
 }
 
-func (server *BaseServer) SyncStart(success bool) {
+func (server *BaseServer) SyncStart() (success bool) {
+	return false
 }
 
-func (server *BaseServer) SyncStop(success bool) {
+func (server *BaseServer) SyncStop() (success bool) {
+	return false
 }
 
 func (server *BaseServer) Init() {
 }
 
-func (server *BaseServer) IsRunning(success bool) {
+func (server *BaseServer) IsRunning() (success bool) {
+	return false
 }

@@ -8,8 +8,8 @@ const (
 	STATUS_DISCONNECTED byte = 2
 )
 
-type Connection interface {
-	Init(conn *net.Conn)
+type Conn interface {
+	Init(conn net.Conn)
 	GetId() string
 	IsConnected() bool
 	IsReadTimeout() bool
@@ -19,9 +19,9 @@ type Connection interface {
 
 type ConnectionManager interface {
 	Init()
-	Add(connection Connection)
-	Get(id string) Connection
-	RemoveAndClose(id string) Connection
+	Add(connection Conn)
+	Get(id string) Conn
+	RemoveAndClose(id string) Conn
 	GetConnNum() int
 	Destroy()
 }

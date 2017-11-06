@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/zyl0501/go-push/boot"
+	"github.com/zyl0501/go-push/core"
 )
 
 func main() {
-	boot.Init()
+	server:= core.NewPushServer()
+	server.Init()
+	server.Start()
 }

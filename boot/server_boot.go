@@ -7,6 +7,7 @@ import (
 	"io"
 )
 
+
 func Init() {
 	netListen, err := net.Listen("tcp", "localhost:9932")
 	if err != nil {
@@ -26,6 +27,10 @@ func Init() {
 
 		handleConnection(conn)
 	}
+}
+
+func Start(){
+
 }
 
 func handleConnection(conn net.Conn) {

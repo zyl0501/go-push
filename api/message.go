@@ -18,9 +18,9 @@ type Message interface {
 }
 
 type MessageHandler interface {
-	Handle(packet protocol.Packet, conn net.Conn) error
+	Handle(packet protocol.Packet, conn Conn) error
 }
 
 type PacketReceiver interface {
-	onReceive(packet protocol.Packet, conn net.Conn)
+	OnReceive(packet protocol.Packet, conn Conn)
 }

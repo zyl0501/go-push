@@ -4,7 +4,6 @@ import (
 	"github.com/zyl0501/go-push/api"
 	"github.com/zyl0501/go-push/api/protocol"
 	log "github.com/alecthomas/log4go"
-	"net"
 )
 
 const (
@@ -18,7 +17,15 @@ type MessageDispatcher struct {
 	unsupportedPolicy int
 }
 
-func (dispatcher *MessageDispatcher) onReceive(packet protocol.Packet, conn net.Conn) {
+func NewMessageDispatcher() (dispatcher MessageDispatcher) {
+	return MessageDispatcher{handlers: make(map[byte]api.MessageHandler), unsupportedPolicy: POLICY_LOG}
+}
+
+func (dispatcher *MessageDispatcher) Register(cmd byte, handler api.MessageHandler) {
+	dispatcher.handlers[cmd] = handler
+}
+
+func (dispatcher *MessageDispatcher) OnReceive(packet protocol.Packet, conn api.Conn) {
 	handler := dispatcher.handlers[packet.Cmd]
 	if handler != nil {
 		err := handler.Handle(packet, conn)

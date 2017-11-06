@@ -4,12 +4,15 @@ import (
 	"net"
 	"fmt"
 	"os"
+	"github.com/zyl0501/go-push/test/client/config"
+	"github.com/zyl0501/go-push/api/protocol"
+	"encoding/json"
 )
 
 
 func main() {
-	InitConfig()
-	server := "localhost:9932"
+	config.InitConfig()
+	server := "localhost:9933"
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", server)
 	if err != nil {
 		fmt.Println(os.Stderr, "Fatal error:%s", err)
@@ -28,7 +31,8 @@ func main() {
 }
 
 func sender(conn net.TCPConn) {
-	words := "test tcp conn"
+	packet := protocol.Packet{Cmd:protocol.HANDSHAKE}
+	words,_ := json.Marshal(packet)
 	conn.Write([]byte(words))
-	fmt.Println("send over")
+	fmt.Println("send over", string(words[:]))
 }
