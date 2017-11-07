@@ -7,6 +7,7 @@ import (
 	"github.com/zyl0501/go-push/test/client/config"
 	"github.com/zyl0501/go-push/api/protocol"
 	"encoding/json"
+	"time"
 )
 
 func main() {
@@ -27,11 +28,15 @@ func main() {
 	defer fmt.Println("connect closed")
 	fmt.Println("connect success")
 	sender(*conn)
+	time.Sleep(time.Second * 4)
+	sender(*conn)
 }
 
 func sender(conn net.TCPConn) {
 	packet := protocol.Packet{Cmd: protocol.HANDSHAKE}
 	words, _ := json.Marshal(packet)
 	conn.Write([]byte(words))
-	fmt.Println("send over", string(words[:]))
+	//conn.Write([]byte(`{"cmd":2,"cc":0,"flags":0,"sessionId":0,"lrc":0,"body":"aaa"}`))
+
+	fmt.Println("send over",len(words), string(words[:]))
 }

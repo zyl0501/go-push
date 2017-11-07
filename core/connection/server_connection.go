@@ -3,29 +3,38 @@ package connection
 import (
 	"net"
 	"github.com/zyl0501/go-push/api"
+	"github.com/zyl0501/go-push/tools/config"
 	"time"
 )
 
-var(lId = 0)
+var (
+	lId = 0
+)
 
 type ServerConnection struct {
 	conn          net.Conn
 	status        byte
-	lastReadTime  int64
-	lastWriteTime int64
+	lastReadTime  time.Time
+	lastWriteTime time.Time
 	id            string
 }
 
 func NewServerConnection() (conn *ServerConnection) {
 	lId++
-	conn = &ServerConnection{conn: nil, status: api.STATUS_NEW, lastReadTime: 0, lastWriteTime: 0, id:string(lId)}
+	conn = &ServerConnection{
+		conn:          nil,
+		status:        api.STATUS_NEW,
+		lastReadTime:  time.Unix(0, 0),
+		lastWriteTime: time.Unix(0, 0),
+		id:            string(lId)}
 	return conn
 }
 
 func (serverConn *ServerConnection) Init(conn net.Conn) {
 	serverConn.conn = conn
 	serverConn.status = api.STATUS_CONNECTED
-	serverConn.lastReadTime = time.Now().Unix()
+	serverConn.lastReadTime = time.Now()
+	serverConn.lastWriteTime = time.Now()
 }
 
 func (serverConn *ServerConnection) GetId() string {
@@ -37,11 +46,18 @@ func (serverConn *ServerConnection) IsConnected() bool {
 }
 
 func (serverConn *ServerConnection) IsReadTimeout() bool {
-	return serverConn.lastReadTime-time.Now().Unix() > 60*1000
+	return time.Since(serverConn.lastReadTime) > config.Heartbeat
 }
 
 func (serverConn *ServerConnection) IsWriteTimeout() bool {
-	return serverConn.lastWriteTime-time.Now().Unix() > 60*1000
+	return time.Since(serverConn.lastReadTime) > config.Heartbeat
+}
+
+func (serverConn *ServerConnection) UpdateLastReadTime() {
+	serverConn.lastReadTime = time.Now()
+}
+func (serverConn *ServerConnection) UpdateLastWriteTime() {
+	serverConn.lastWriteTime = time.Now()
 }
 
 func (serverConn *ServerConnection) Close() {

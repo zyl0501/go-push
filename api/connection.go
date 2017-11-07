@@ -14,6 +14,8 @@ type Conn interface {
 	IsConnected() bool
 	IsReadTimeout() bool
 	IsWriteTimeout() bool
+	UpdateLastReadTime()
+	UpdateLastWriteTime()
 	Close()
 }
 

@@ -9,8 +9,9 @@ import (
 	"github.com/zyl0501/go-push/common"
 	"github.com/zyl0501/go-push/api/protocol"
 	"github.com/zyl0501/go-push/core/handler"
-	"io"
 	"encoding/json"
+	"io/ioutil"
+	"io"
 )
 
 type ConnectionServer struct {
@@ -70,28 +71,34 @@ func (server *ConnectionServer) listen() {
 		if err != nil {
 			continue
 		}
-		log.Info(conn.RemoteAddr().String(), "tcp connect success")
+		log.Info("%s tcp connect success", conn.RemoteAddr().String())
 
-		server.handlerMessage(conn)
+		go server.handlerMessage(conn)
 	}
 }
 func (server *ConnectionServer) handlerMessage(conn net.Conn) {
 	serverConn := connection.NewServerConnection()
 	serverConn.Init(conn)
 	server.connManager.Add(serverConn)
-	buffer := make([]byte, 2048)
-	n, err := conn.Read(buffer)
+
+	buf, err := ioutil.ReadAll(conn)
 	if err != nil {
 		if err != io.EOF {
 			log.Error(conn.RemoteAddr().String(), "connect error:", err)
+			server.connManager.RemoveAndClose(serverConn.GetId())
 		}
+	} else {
+		serverConn.UpdateLastReadTime()
+		packet := decodeJson(buf)
+		server.messageDispatcher.OnReceive(packet, serverConn)
 	}
-	packet := decodeJson(buffer[:n])
-	server.messageDispatcher.OnReceive(packet, serverConn)
 }
 
-func decodeJson(content []byte) (packet protocol.Packet) {
-	packet = protocol.Packet{Cmd: protocol.UNKNOWN}
-	json.Unmarshal(content, &packet)
+func decodeJson(content []byte) (protocol.Packet) {
+	packet := protocol.Packet{Cmd: protocol.OK}
+	err := json.Unmarshal(content, &packet)
+	if err != nil {
+		log.Error("content %s parse json error %v", string(content), err)
+	}
 	return packet
 }
