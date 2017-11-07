@@ -10,7 +10,6 @@ import (
 	"github.com/zyl0501/go-push/api/protocol"
 	"github.com/zyl0501/go-push/core/handler"
 	"encoding/json"
-	"io/ioutil"
 	"io"
 )
 
@@ -81,16 +80,23 @@ func (server *ConnectionServer) handlerMessage(conn net.Conn) {
 	serverConn.Init(conn)
 	server.connManager.Add(serverConn)
 
-	buf, err := ioutil.ReadAll(conn)
-	if err != nil {
-		if err != io.EOF {
-			log.Error(conn.RemoteAddr().String(), "connect error:", err)
-			server.connManager.RemoveAndClose(serverConn.GetId())
+	//var rc chan []byte
+	buf := make([]byte,1024)
+	for {
+		//var err error
+		//buf,err = ioutil.ReadAll(conn)
+		l, err := conn.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				log.Error("%s connect error: %v", conn.RemoteAddr().String(), err)
+				server.connManager.RemoveAndClose(serverConn.GetId())
+				break
+			}
+		} else {
+			serverConn.UpdateLastReadTime()
+			packet := decodeJson(buf[:l])
+			server.messageDispatcher.OnReceive(packet, serverConn)
 		}
-	} else {
-		serverConn.UpdateLastReadTime()
-		packet := decodeJson(buf)
-		server.messageDispatcher.OnReceive(packet, serverConn)
 	}
 }
 

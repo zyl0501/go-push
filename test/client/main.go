@@ -27,8 +27,11 @@ func main() {
 	defer conn.Close()
 	defer fmt.Println("connect closed")
 	fmt.Println("connect success")
+	time.Sleep(time.Second * 3)
 	sender(*conn)
-	time.Sleep(time.Second * 4)
+	time.Sleep(time.Second * 3)
+	sender(*conn)
+	time.Sleep(time.Second * 3)
 	sender(*conn)
 }
 
@@ -36,7 +39,5 @@ func sender(conn net.TCPConn) {
 	packet := protocol.Packet{Cmd: protocol.HANDSHAKE}
 	words, _ := json.Marshal(packet)
 	conn.Write([]byte(words))
-	//conn.Write([]byte(`{"cmd":2,"cc":0,"flags":0,"sessionId":0,"lrc":0,"body":"aaa"}`))
-
 	fmt.Println("send over",len(words), string(words[:]))
 }
