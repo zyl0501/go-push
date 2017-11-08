@@ -80,11 +80,11 @@ func (server *ConnectionServer) handlerMessage(conn net.Conn) {
 	server.connManager.Add(serverConn)
 
 	//var rc chan []byte
-	buf := make([]byte, protocol.HeadLength)
-
+	head := make([]byte, protocol.HeadLength)
+	headReadLen := 0
 loop:
 	for {
-		_, err := conn.Read(buf)
+		n, err := conn.Read(head[headReadLen:protocol.HeadLength])
 		if err != nil {
 			if err == io.EOF {
 				log.Error("%s connect error: %v", conn.RemoteAddr().String(), err)
@@ -92,26 +92,34 @@ loop:
 				break loop
 			}
 		} else {
-			packet, bodyLength := protocol.DecodePacket(buf)
-			readLen := 0
-			body := make([]byte, bodyLength)
-			for {
-				n, err := conn.Read(body[readLen: bodyLength])
-				if err != nil {
-					if err == io.EOF {
-						log.Error("%s connect error: %v", conn.RemoteAddr().String(), err)
-						server.connManager.RemoveAndClose(serverConn.GetId())
-						break loop
-					}
-				} else {
-					if uint32(readLen)+uint32(n) < bodyLength {
-						log.Info("read part %s", string(body[readLen:readLen+n]))
-						readLen += n
+			if uint32(headReadLen)+uint32(n) < uint32(protocol.HeadLength) {
+				log.Debug("read head part %s", string(head[headReadLen:headReadLen+n]))
+				headReadLen += n
+			} else {
+				headReadLen = 0
+				log.Debug("read head complete %s", string(head))
+				packet, bodyLength := protocol.DecodePacket(head)
+				readLen := 0
+				body := make([]byte, bodyLength)
+				log.Debug("body length %d", bodyLength)
+				for {
+					n, err := conn.Read(body[readLen: bodyLength])
+					if err != nil {
+						if err == io.EOF {
+							log.Error("%s connect error: %v", conn.RemoteAddr().String(), err)
+							server.connManager.RemoveAndClose(serverConn.GetId())
+							break loop
+						}
 					} else {
-						log.Info("read complete %s", string(body))
-						packet.Body = body
-						server.messageDispatcher.OnReceive(packet, serverConn)
-						break
+						if uint32(readLen)+uint32(n) < bodyLength {
+							log.Debug("read body part %s", string(body[readLen:readLen+n]))
+							readLen += n
+						} else {
+							log.Debug("read body complete %s", string(body))
+							packet.Body = body
+							server.messageDispatcher.OnReceive(packet, serverConn)
+							break
+						}
 					}
 				}
 			}

@@ -52,8 +52,12 @@ func sender1(conn net.TCPConn) {
 	data2 := make([]byte,len(data)*2)
 	copy(data2[0:len(data)], data)
 	copy(data2[len(data):], data)
-	conn.Write(data2)
+	conn.Write(data2[0:18])
+	time.Sleep(time.Second * 10)
+	conn.Write(data2[18:])
 	fmt.Println("send over",len(data), string(data))
+
+	time.Sleep(time.Second * 10)
 }
 
 func stringToSliceByte(s string) []byte {
