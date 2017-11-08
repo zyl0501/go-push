@@ -26,8 +26,8 @@ func main() {
 	//mapTest()
 	//enumTest()
 	//chanTest3()
-	//bufReadWrite()
-	jsonTest()
+	bufReadWrite()
+	//jsonTest()
 }
 func mapTest() {
 	var pc map[string]string

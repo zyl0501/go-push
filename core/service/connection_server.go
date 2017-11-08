@@ -9,7 +9,6 @@ import (
 	"github.com/zyl0501/go-push/common"
 	"github.com/zyl0501/go-push/api/protocol"
 	"github.com/zyl0501/go-push/core/handler"
-	"encoding/json"
 	"io"
 )
 
@@ -81,30 +80,41 @@ func (server *ConnectionServer) handlerMessage(conn net.Conn) {
 	server.connManager.Add(serverConn)
 
 	//var rc chan []byte
-	buf := make([]byte,1024)
+	buf := make([]byte, protocol.HeadLength)
+
+loop:
 	for {
-		//var err error
-		//buf,err = ioutil.ReadAll(conn)
-		l, err := conn.Read(buf)
+		_, err := conn.Read(buf)
 		if err != nil {
 			if err == io.EOF {
 				log.Error("%s connect error: %v", conn.RemoteAddr().String(), err)
 				server.connManager.RemoveAndClose(serverConn.GetId())
-				break
+				break loop
 			}
 		} else {
-			serverConn.UpdateLastReadTime()
-			packet := decodeJson(buf[:l])
-			server.messageDispatcher.OnReceive(packet, serverConn)
+			packet, bodyLength := protocol.DecodePacket(buf)
+			readLen := 0
+			body := make([]byte, bodyLength)
+			for {
+				n, err := conn.Read(body[readLen: bodyLength])
+				if err != nil {
+					if err == io.EOF {
+						log.Error("%s connect error: %v", conn.RemoteAddr().String(), err)
+						server.connManager.RemoveAndClose(serverConn.GetId())
+						break loop
+					}
+				} else {
+					if uint32(readLen)+uint32(n) < bodyLength {
+						log.Info("read part %s", string(body[readLen:readLen+n]))
+						readLen += n
+					} else {
+						log.Info("read complete %s", string(body))
+						packet.Body = body
+						server.messageDispatcher.OnReceive(packet, serverConn)
+						break
+					}
+				}
+			}
 		}
 	}
-}
-
-func decodeJson(content []byte) (protocol.Packet) {
-	packet := protocol.Packet{Cmd: protocol.OK}
-	err := json.Unmarshal(content, &packet)
-	if err != nil {
-		log.Error("content %s parse json error %v", string(content), err)
-	}
-	return packet
 }

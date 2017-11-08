@@ -11,5 +11,6 @@ type HandshakeHandler struct {
 
 func (handler HandshakeHandler) Handle(packet protocol.Packet, conn api.Conn) error {
 	log.Debug("HandshakeHandler invoke")
+	log.Debug("content is %s", string(packet.Body))
 	return nil
 }

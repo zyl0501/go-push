@@ -3,6 +3,7 @@ package connection
 import (
 	cmap "github.com/orcaman/concurrent-map"
 	"github.com/zyl0501/go-push/api"
+	log "github.com/alecthomas/log4go"
 )
 
 type ServerConnectionManager struct {
@@ -23,6 +24,7 @@ func (manager *ServerConnectionManager) GetConnNum() int {
 
 func (manager *ServerConnectionManager) Add(connection api.Conn) {
 	manager.connections.SetIfAbsent(connection.GetId(), connection)
+	log.Info("%d connections", manager.connections.Count())
 }
 
 func (manager *ServerConnectionManager) Get(id string) api.Conn {
