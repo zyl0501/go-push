@@ -102,6 +102,7 @@ loop:
 				readLen := 0
 				body := make([]byte, bodyLength)
 				log.Debug("body length %d", bodyLength)
+			bodyLoop:
 				for {
 					n, err := conn.Read(body[readLen: bodyLength])
 					if err != nil {
@@ -109,6 +110,8 @@ loop:
 							log.Error("%s connect error: %v", conn.RemoteAddr().String(), err)
 							server.connManager.RemoveAndClose(serverConn.GetId())
 							break loop
+						} else {
+							break bodyLoop
 						}
 					} else {
 						if uint32(readLen)+uint32(n) < bodyLength {
