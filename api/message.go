@@ -12,7 +12,7 @@ type Message interface {
 
 	EncodeBody()
 
-	//send(listener ChannelFutureListener)
+	Send()
 
 	GetPacket() protocol.Packet
 }

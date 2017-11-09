@@ -22,6 +22,12 @@ const (
 	FlagsIndex     = 6
 	SessionIdIndex = 7
 	LrcIndex       = 11
+
+	FLAG_CRYPTO    = 1
+	FLAG_COMPRESS  = 2
+	FLAG_BIZ_ACK   = 4
+	FLAG_AUTO_ACK  = 8
+	FLAG_JSON_BODY = 16
 )
 
 type Packet struct {
@@ -66,6 +72,10 @@ func (packet *Packet) GetBodyLength() uint32 {
 	} else {
 		return uint32(len(packet.Body))
 	}
+}
+
+func (packet *Packet) HasFlag(flag byte) bool {
+	return (packet.Flags & flag) != 0;
 }
 
 func DecodePacket(buf []byte) (Packet, uint32) {

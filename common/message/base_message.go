@@ -2,29 +2,44 @@ package message
 
 import (
 	"github.com/zyl0501/go-push/api"
+	"bufio"
 	"github.com/zyl0501/go-push/api/protocol"
-	"net"
-	"github.com/zyl0501/go-push/core/service"
-	"github.com/zyl0501/go-push/core/connection"
 )
 
-type BaseMessage struct {
-	packet protocol.Packet
-	connection api.Conn
+func DecodeBaseMessage(codec BaseMessageCodec, m api.Message) {
+	msg := m
+	packet := msg.GetPacket()
+
+	//1.解密
+	tmp := packet.Body;
+	//2.解压
+
+	if len(tmp) == 0 {
+		//"message decode ex"
+		return
+	}
+
+	packet.Body = tmp
+	codec.DecodeBaseMessage(packet.Body)
+	packet.Body = nil // 释放内存
 }
 
-func (message *BaseMessage) GetConnection() api.Conn {
-	return message.connection
+func EncodeBaseMessage(codec BaseMessageCodec, m api.Message) {
+	tmp := codec.EncodeBaseMessage();
+	if len(tmp) > 0 {
+		//1.压缩
+		//2.加密
+	}
 }
 
-func (message *BaseMessage) DecodeBody() {
-
+func Send(msg api.Message) {
+	msg.EncodeBody()
+	writer := bufio.NewWriter(msg.GetConnection().GetConn())
+	writer.Write(protocol.EncodePacket(msg.GetPacket()))
 }
 
-func (message *BaseMessage) EncodeBody() {
+type BaseMessageCodec interface {
+	DecodeBaseMessage(body []byte)
 
-}
-
-func (message *BaseMessage) GetPacket() protocol.Packet {
-	return message.packet
+	EncodeBaseMessage() ([]byte)
 }

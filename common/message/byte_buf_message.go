@@ -4,28 +4,25 @@ import (
 	"encoding/binary"
 	"math"
 	"io"
-	"github.com/zyl0501/go-push/api/protocol"
-	"github.com/zyl0501/go-push/api"
+	"bytes"
+	"bufio"
 )
 
-type ByteBufMessage struct {
-	baseMessage BaseMessage
+type ByteBufMessageCodec interface {
+	DecodeByteBufMessage(reader io.Reader)
+	EncodeByteBufMessage(writer io.Writer)
 }
 
-func (message *ByteBufMessage) GetConnection() api.Conn {
-	return message.baseMessage.GetConnection()
+func DecodeByteBufMessage(codec ByteBufMessageCodec, body []byte) {
+	codec.DecodeByteBufMessage(bytes.NewReader(body))
 }
 
-func (message *ByteBufMessage) DecodeBody() {
-	message.baseMessage.DecodeBody()
-}
-
-func (message *ByteBufMessage) EncodeBody() {
-	message.baseMessage.EncodeBody()
-}
-
-func (message *ByteBufMessage) GetPacket() protocol.Packet {
-	return message.baseMessage.GetPacket()
+func EncodeByteBufMessage(codec ByteBufMessageCodec) ([]byte) {
+	buf := bytes.NewBuffer(make([]byte, 0))
+	writer := bufio.NewWriter(buf)
+	codec.EncodeByteBufMessage(writer)
+	writer.Flush()
+	return buf.Bytes()
 }
 
 func EncodeString(writer io.Writer, field string) {

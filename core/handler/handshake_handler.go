@@ -13,8 +13,16 @@ import (
 type HandshakeHandler struct {
 }
 
-func (handler HandshakeHandler) Handle(packet protocol.Packet, conn api.Conn) {
-	msg := message.HandshakeMessage(handler.decode(packet, conn))
+func (handler *HandshakeHandler) Handle(packet protocol.Packet, conn api.Conn) {
+	Handle(handler, packet, conn)
+}
+
+func (handler *HandshakeHandler) Decode(packet protocol.Packet, conn api.Conn) api.Message{
+	return message.HandshakeMessage{Pkt: packet, Connection: conn}
+}
+
+func (handler *HandshakeHandler) HandleMessage(m api.Message){
+	msg := message.HandshakeMessage(m)
 
 	iv := msg.Iv;                  //AES密钥向量16位
 	clientKey := msg.ClientKey;    //客户端随机数16位
@@ -36,8 +44,4 @@ func (handler HandshakeHandler) Handle(packet protocol.Packet, conn api.Conn) {
 	//7.更换会话密钥AES(clientKey)=>AES(sessionKey)
 	//8.保存client信息到当前连接
 	//9.保存可复用session到Redis, 用于快速重连
-}
-
-func (handler HandshakeHandler) decode(packet protocol.Packet, conn api.Conn) api.Message {
-	return message.HandshakeMessage{Pkt: packet, Connection: conn}
 }
