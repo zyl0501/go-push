@@ -7,33 +7,17 @@ import (
 )
 
 type BaseMessage struct {
+	api.Message
+	baseMessageCodec
 	Pkt        protocol.Packet
 	Connection api.Conn
-	codec      baseMessageCodec
 }
 
-func (message *BaseMessage) GetConnection() api.Conn {
-	return message.Connection
+func (msg *BaseMessage) GetConnection() api.Conn {
+	return msg.Connection
 }
 
-func (message *BaseMessage) DecodeBody() {
-	message.decodeBaseMessage(message.codec, message)
-}
-
-func (message *BaseMessage) EncodeBody() {
-	message.encodeBaseMessage(message.codec, message)
-}
-
-func (message *BaseMessage) GetPacket() protocol.Packet {
-	return message.Pkt
-}
-
-func (message *BaseMessage) Send() {
-	send(message)
-}
-
-func (message *BaseMessage) decodeBaseMessage(codec baseMessageCodec, m api.Message) {
-	msg := m
+func (msg *BaseMessage) DecodeBody() {
 	packet := msg.GetPacket()
 
 	//1.解密
@@ -46,26 +30,26 @@ func (message *BaseMessage) decodeBaseMessage(codec baseMessageCodec, m api.Mess
 	}
 
 	packet.Body = tmp
-	codec.DecodeBaseMessage(packet.Body)
+	msg.DecodeBaseMessage(packet.Body)
 	packet.Body = nil // 释放内存
 }
 
-func (message *BaseMessage) encodeBaseMessage(codec baseMessageCodec, m api.Message) {
-	tmp := codec.EncodeBaseMessage();
+func (msg *BaseMessage) EncodeBody() {
+	tmp := msg.EncodeBaseMessage();
 	if len(tmp) > 0 {
 		//1.压缩
 		//2.加密
 	}
 }
 
-func send(msg api.Message) {
+func (msg *BaseMessage) GetPacket() protocol.Packet {
+	return msg.Pkt
+}
+
+func (msg *BaseMessage) Send() {
 	msg.EncodeBody()
 	writer := bufio.NewWriter(msg.GetConnection().GetConn())
 	writer.Write(protocol.EncodePacket(msg.GetPacket()))
-}
-
-func newBaseMessage(packet protocol.Packet, conn api.Conn, codec baseMessageCodec) *BaseMessage {
-	return &BaseMessage{Pkt: packet, Connection: conn, codec: codec}
 }
 
 type baseMessageCodec interface {

@@ -9,6 +9,8 @@ import (
 	"io"
 	"encoding/json"
 	"encoding/binary"
+	"github.com/zyl0501/go-push/api/protocol"
+	"github.com/zyl0501/go-push/common/message"
 )
 
 const (

@@ -6,49 +6,21 @@ import (
 	"io"
 	"bytes"
 	"bufio"
-	"github.com/zyl0501/go-push/api"
-	"github.com/zyl0501/go-push/api/protocol"
 )
 
 type ByteBufMessage struct {
-	baseMessage BaseMessage
-	codec       byteBufMessageCodec
-}
-
-func (message *ByteBufMessage) GetConnection() api.Conn {
-	return message.baseMessage.Connection
-}
-
-func (message *ByteBufMessage) DecodeBody() {
-	message.baseMessage.DecodeBody()
-}
-
-func (message *ByteBufMessage) EncodeBody() {
-	message.baseMessage.EncodeBody()
-}
-
-func (message *ByteBufMessage) GetPacket() protocol.Packet {
-	return message.baseMessage.Pkt
-}
-
-func (message *ByteBufMessage) Send() {
-	message.baseMessage.Send()
-}
-
-func newByteBufMessage(packet protocol.Packet, conn api.Conn, codec byteBufMessageCodec) *ByteBufMessage {
-	msg := ByteBufMessage{codec: codec}
-	msg.baseMessage = *newBaseMessage(packet, conn, msg)
-	return &msg
+	BaseMessage
+	byteBufMessageCodec
 }
 
 func (message *ByteBufMessage) DecodeBaseMessage(body []byte) {
-	message.codec.DecodeByteBufMessage(bytes.NewReader(body))
+	message.DecodeByteBufMessage(bytes.NewReader(body))
 }
 
 func (message *ByteBufMessage) EncodeBaseMessage() ([]byte) {
 	buf := bytes.NewBuffer(make([]byte, 0))
 	writer := bufio.NewWriter(buf)
-	message.codec.EncodeByteBufMessage(writer)
+	message.EncodeByteBufMessage(writer)
 	writer.Flush()
 	return buf.Bytes()
 }
@@ -79,33 +51,34 @@ func EncodeBytes(writer io.Writer, field []byte) {
 }
 
 func EncodeInt16(writer io.Writer, field interface{}) {
-	encode(writer, int16(field))
+	encode(writer, field.(int16))
 }
 
 func EncodeInt32(writer io.Writer, field interface{}) {
-	encode(writer, int32(field))
+	encode(writer, field.(int32))
 }
 
 func EncodeInt64(writer io.Writer, field interface{}) {
-	encode(writer, int64(field))
+	encode(writer, field.(int64))
 }
 
 func EncodeByte(writer io.Writer, field interface{}) {
-	encode(writer, byte(field))
+	encode(writer, field.(byte))
 }
 
 func encodeBytes(writer io.Writer, field interface{}) {
-	encode(writer, []byte(field))
+	encode(writer, field.([]byte))
 }
 
 func encode(writer io.Writer, field interface{}) {
 	binary.Write(writer, binary.BigEndian, field)
 }
 
-func DecodeString(reader io.Reader) (field string) {
+func DecodeString(reader io.Reader) (string) {
 	buf := DecodeBytes(reader)
 	if buf == nil {
-		return nil
+		var field string
+		return field
 	} else {
 		return string(buf)
 	}

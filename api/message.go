@@ -1,7 +1,6 @@
 package api
 
 import (
-	"net"
 	"github.com/zyl0501/go-push/api/protocol"
 )
 

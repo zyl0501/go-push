@@ -7,7 +7,8 @@ import (
 )
 
 type HandshakeMessage struct {
-	byteBufMessage ByteBufMessage
+	ByteBufMessage
+	byteBufMessageCodec
 
 	DeviceId      string
 	OsName        string
@@ -20,29 +21,11 @@ type HandshakeMessage struct {
 	Timestamp     int64
 }
 
-func (message *HandshakeMessage) GetConnection() api.Conn {
-	return message.byteBufMessage.GetConnection()
-}
-
-func (message *HandshakeMessage) DecodeBody() {
-	message.byteBufMessage.DecodeBody()
-}
-
-func (message *HandshakeMessage) EncodeBody() {
-	message.byteBufMessage.EncodeBody()
-}
-
-func (message *HandshakeMessage) GetPacket() protocol.Packet {
-	return message.byteBufMessage.GetPacket()
-}
-
-func (message *HandshakeMessage) Send() {
-	message.byteBufMessage.Send()
-}
-
 func NewHandshakeMessage(packet protocol.Packet, conn api.Conn) (*HandshakeMessage) {
 	msg := HandshakeMessage{}
-	msg.byteBufMessage = *newByteBufMessage(packet, conn, msg)
+	msg.Pkt = packet
+	msg.Connection = conn
+
 	return &msg
 }
 
