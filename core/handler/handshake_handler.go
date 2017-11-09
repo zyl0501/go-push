@@ -18,8 +18,8 @@ func (handler HandshakeHandler) Handle(packet protocol.Packet, conn api.Conn) {
 
 	iv := msg.Iv;                  //AES密钥向量16位
 	clientKey := msg.ClientKey;    //客户端随机数16位
-	serverKey := make([]byte, 0);  //服务端随机数16位
-	sessionKey := make([]byte, 0); //会话密钥16位
+	serverKey := security.CipherBoxIns.RandomAESKey();  //服务端随机数16位
+	sessionKey := security.CipherBoxIns.MixKey(clientKey, serverKey); //会话密钥16位
 
 	//1.校验客户端消息字段
 	if len(msg.DeviceId) == 0 || len(iv) != security.CipherBoxIns.AesKeyLength || len(clientKey) != security.CipherBoxIns.AesKeyLength {
@@ -28,6 +28,7 @@ func (handler HandshakeHandler) Handle(packet protocol.Packet, conn api.Conn) {
 		return
 	}
 	//2.重复握手判断
+
 	//3.更换会话密钥RSA=>AES(clientKey)
 	//4.生成可复用session, 用于快速重连
 	//5.计算心跳时间

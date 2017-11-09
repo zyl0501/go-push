@@ -28,10 +28,7 @@ func (dispatcher *MessageDispatcher) Register(cmd byte, handler api.MessageHandl
 func (dispatcher *MessageDispatcher) OnReceive(packet protocol.Packet, conn api.Conn) {
 	handler := dispatcher.handlers[packet.Cmd]
 	if handler != nil {
-		err := handler.Handle(packet, conn)
-		if err != nil {
-			log.Error("dispatch message ex, packet={}, connect={}, body={}")
-		}
+		handler.Handle(packet, conn)
 	} else {
 		if dispatcher.unsupportedPolicy > POLICY_IGNORE {
 			log.Error("dispatch message failure, cmd={} unsupported, packet={}, connect={}, body={}")

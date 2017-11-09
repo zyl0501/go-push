@@ -15,6 +15,9 @@ type CipherBox struct {
 	PublicKey    rsa.PublicKey
 }
 
-func RandomAESKey()([]byte){
+func (*CipherBox) RandomAESKey()([]byte){
+	return nil
+}
+func (*CipherBox) MixKey(clientKey []byte, serverKey []byte)([]byte){
 	return nil
 }
