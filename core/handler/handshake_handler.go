@@ -11,14 +11,15 @@ import (
 )
 
 type HandshakeHandler struct {
+	baseHandler baseMessageHandler
 }
 
 func (handler *HandshakeHandler) Handle(packet protocol.Packet, conn api.Conn) {
-	Handle(handler, packet, conn)
+	handler.baseHandler.Handle(packet, conn)
 }
 
 func (handler *HandshakeHandler) Decode(packet protocol.Packet, conn api.Conn) api.Message{
-	return message.HandshakeMessage{Pkt: packet, Connection: conn}
+	return message.NewHandshakeMessage(packet, conn)
 }
 
 func (handler *HandshakeHandler) HandleMessage(m api.Message){

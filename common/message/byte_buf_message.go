@@ -6,24 +6,59 @@ import (
 	"io"
 	"bytes"
 	"bufio"
+	"github.com/zyl0501/go-push/api"
+	"github.com/zyl0501/go-push/api/protocol"
 )
 
-type ByteBufMessageCodec interface {
+type ByteBufMessage struct {
+	baseMessage BaseMessage
+	codec       byteBufMessageCodec
+}
+
+func (message *ByteBufMessage) GetConnection() api.Conn {
+	return message.baseMessage.Connection
+}
+
+func (message *ByteBufMessage) DecodeBody() {
+	message.baseMessage.DecodeBody()
+}
+
+func (message *ByteBufMessage) EncodeBody() {
+	message.baseMessage.EncodeBody()
+}
+
+func (message *ByteBufMessage) GetPacket() protocol.Packet {
+	return message.baseMessage.Pkt
+}
+
+func (message *ByteBufMessage) Send() {
+	message.baseMessage.Send()
+}
+
+func newByteBufMessage(packet protocol.Packet, conn api.Conn, codec byteBufMessageCodec) *ByteBufMessage {
+	msg := ByteBufMessage{codec: codec}
+	msg.baseMessage = *newBaseMessage(packet, conn, msg)
+	return &msg
+}
+
+func (message *ByteBufMessage) DecodeBaseMessage(body []byte) {
+	message.codec.DecodeByteBufMessage(bytes.NewReader(body))
+}
+
+func (message *ByteBufMessage) EncodeBaseMessage() ([]byte) {
+	buf := bytes.NewBuffer(make([]byte, 0))
+	writer := bufio.NewWriter(buf)
+	message.codec.EncodeByteBufMessage(writer)
+	writer.Flush()
+	return buf.Bytes()
+}
+
+type byteBufMessageCodec interface {
 	DecodeByteBufMessage(reader io.Reader)
 	EncodeByteBufMessage(writer io.Writer)
 }
 
-func DecodeByteBufMessage(codec ByteBufMessageCodec, body []byte) {
-	codec.DecodeByteBufMessage(bytes.NewReader(body))
-}
-
-func EncodeByteBufMessage(codec ByteBufMessageCodec) ([]byte) {
-	buf := bytes.NewBuffer(make([]byte, 0))
-	writer := bufio.NewWriter(buf)
-	codec.EncodeByteBufMessage(writer)
-	writer.Flush()
-	return buf.Bytes()
-}
+//***********************Encode/Decode method***********************
 
 func EncodeString(writer io.Writer, field string) {
 	EncodeBytes(writer, []byte(field))

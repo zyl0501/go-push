@@ -6,7 +6,33 @@ import (
 	"github.com/zyl0501/go-push/api/protocol"
 )
 
-func DecodeBaseMessage(codec BaseMessageCodec, m api.Message) {
+type BaseMessage struct {
+	Pkt        protocol.Packet
+	Connection api.Conn
+	codec      baseMessageCodec
+}
+
+func (message *BaseMessage) GetConnection() api.Conn {
+	return message.Connection
+}
+
+func (message *BaseMessage) DecodeBody() {
+	message.decodeBaseMessage(message.codec, message)
+}
+
+func (message *BaseMessage) EncodeBody() {
+	message.encodeBaseMessage(message.codec, message)
+}
+
+func (message *BaseMessage) GetPacket() protocol.Packet {
+	return message.Pkt
+}
+
+func (message *BaseMessage) Send() {
+	send(message)
+}
+
+func (message *BaseMessage) decodeBaseMessage(codec baseMessageCodec, m api.Message) {
 	msg := m
 	packet := msg.GetPacket()
 
@@ -24,7 +50,7 @@ func DecodeBaseMessage(codec BaseMessageCodec, m api.Message) {
 	packet.Body = nil // 释放内存
 }
 
-func EncodeBaseMessage(codec BaseMessageCodec, m api.Message) {
+func (message *BaseMessage) encodeBaseMessage(codec baseMessageCodec, m api.Message) {
 	tmp := codec.EncodeBaseMessage();
 	if len(tmp) > 0 {
 		//1.压缩
@@ -32,13 +58,17 @@ func EncodeBaseMessage(codec BaseMessageCodec, m api.Message) {
 	}
 }
 
-func Send(msg api.Message) {
+func send(msg api.Message) {
 	msg.EncodeBody()
 	writer := bufio.NewWriter(msg.GetConnection().GetConn())
 	writer.Write(protocol.EncodePacket(msg.GetPacket()))
 }
 
-type BaseMessageCodec interface {
+func newBaseMessage(packet protocol.Packet, conn api.Conn, codec baseMessageCodec) *BaseMessage {
+	return &BaseMessage{Pkt: packet, Connection: conn, codec: codec}
+}
+
+type baseMessageCodec interface {
 	DecodeBaseMessage(body []byte)
 
 	EncodeBaseMessage() ([]byte)
