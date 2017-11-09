@@ -70,5 +70,5 @@ func (message *HandshakeMessage) DecodeBaseMessage(body []byte) {
 }
 
 func (message *HandshakeMessage) EncodeBaseMessage() ([]byte) {
-	return EncodeByteBufMessage(message, message)
+	return EncodeByteBufMessage(message)
 }
