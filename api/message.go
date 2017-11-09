@@ -6,19 +6,19 @@ import (
 )
 
 type Message interface {
-	getConnection() net.Conn
+	GetConnection() Conn
 
-	decodeBody()
+	DecodeBody()
 
-	encodeBody()
+	EncodeBody()
 
 	//send(listener ChannelFutureListener)
 
-	getPacket() protocol.Packet
+	GetPacket() protocol.Packet
 }
 
 type MessageHandler interface {
-	Handle(packet protocol.Packet, conn Conn) error
+	Handle(packet protocol.Packet, conn Conn)
 }
 
 type PacketReceiver interface {

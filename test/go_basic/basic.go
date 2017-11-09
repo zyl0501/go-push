@@ -8,6 +8,7 @@ import (
 	"strings"
 	"io"
 	"encoding/json"
+	"encoding/binary"
 )
 
 const (
@@ -26,8 +27,10 @@ func main() {
 	//mapTest()
 	//enumTest()
 	//chanTest3()
-	bufReadWrite()
+	//bufReadWrite()
 	//jsonTest()
+	//appendTest()
+	binaryTest()
 }
 func mapTest() {
 	var pc map[string]string
@@ -433,4 +436,32 @@ func jsonTest(){
 		panic(err)
 	}
 	fmt.Printf("%+v", out)
+}
+
+func appendTest(){
+	//a := []byte("hello")
+	b := []byte("bbbb")
+	//s := "world"
+	//b = append(a, s...) // use "..." as suffice
+	//fmt.Printf("%s",a)
+	//fmt.Println(" ")
+
+	append2(b)
+	fmt.Printf("%s", b)
+}
+
+func append2(buf []byte){
+	buf = append(buf, "2222"...)
+}
+
+func binaryTest(){
+	b11 := bytes.NewBuffer(make([]byte, 0, 2))
+	writer := bufio.NewWriter(b11)
+	binary.Write(writer,binary.BigEndian, uint16(23))
+	writer.Flush()
+
+	bb := b11.Bytes()
+	var result uint16
+	binary.Read(bytes.NewReader(bb),binary.BigEndian, &result)
+	fmt.Println("result: ",result)
 }

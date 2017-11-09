@@ -66,3 +66,11 @@ func (serverConn *ServerConnection) Close() {
 		serverConn.conn.Close()
 	}
 }
+
+func (serverConn *ServerConnection) GetConn() net.Conn {
+	if serverConn.conn != nil {
+		return serverConn.conn
+	} else {
+		return nil
+	}
+}

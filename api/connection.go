@@ -17,6 +17,7 @@ type Conn interface {
 	UpdateLastReadTime()
 	UpdateLastWriteTime()
 	Close()
+	GetConn() net.Conn
 }
 
 type ConnectionManager interface {
