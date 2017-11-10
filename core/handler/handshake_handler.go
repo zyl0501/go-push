@@ -9,6 +9,7 @@ import (
 	log "github.com/alecthomas/log4go"
 	"github.com/zyl0501/go-push/common/security"
 	"github.com/zyl0501/go-push/core/connection"
+	"context"
 )
 
 type HandshakeHandler struct {
@@ -33,13 +34,20 @@ func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 	if len(msg.DeviceId) == 0 || len(iv) != security.CipherBoxIns.AesKeyLength || len(clientKey) != security.CipherBoxIns.AesKeyLength {
 		errMsg := message.NewErrorMessage(msg)
 		errMsg.Reason = "Param invalid"
-		errMsg.Close()
+		errMsg.Send()
 		handler.ConnectionManager.RemoveAndClose(m.GetConnection().GetId())
 		log.Error("handshake failure, message=%v, conn=%v", msg, msg.GetConnection());
 		return
 	}
 	//2.重复握手判断
-
+	ctx := msg.GetConnection().GetSessionContext()
+	if msg.DeviceId == ctx.DeviceId {
+		errMsg := message.NewErrorMessage(msg)
+		errMsg.Reason = "repeat handshake"
+		errMsg.Send()
+		log.Warn("handshake failure, repeat handshake, conn=%v", msg.GetConnection())
+		return;
+	}
 	//3.更换会话密钥RSA=>AES(clientKey)
 	//4.生成可复用session, 用于快速重连
 	//5.计算心跳时间

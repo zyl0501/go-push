@@ -70,6 +70,17 @@ func (msg *ByteBufMessage) encodeBaseMessage() ([]byte) {
 	return buf.Bytes()
 }
 
+func (msg *ByteBufMessage) sendRaw() {
+	msg.encodeRaw()
+	writer := bufio.NewWriter(msg.GetConnection().GetConn())
+	writer.Write(protocol.EncodePacket(msg.GetPacket()))
+}
+
+func (msg *ByteBufMessage) encodeRaw() {
+	tmp := msg.encodeBaseMessage()
+	msg.Pkt.Body = tmp
+}
+
 type byteBufMessageCodec interface {
 	decodeByteBufMessage(reader io.Reader)
 	encodeByteBufMessage(writer io.Writer)

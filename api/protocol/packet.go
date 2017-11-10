@@ -44,6 +44,7 @@ type Packet struct {
 	Body      []byte`json:"body"`
 }
 
+//Packet Cmd
 const (
 	HEARTBEAT            byte = 1 + iota //1
 	HANDSHAKE                            //2
