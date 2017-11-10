@@ -51,7 +51,11 @@ func (manager *ServerConnectionManager) RemoveAndClose(id string) api.Conn {
 	}
 	removeOk := manager.connections.RemoveCb(id, cb)
 	if removeOk {
-		return mapVal.(api.Conn)
+		conn := mapVal.(api.Conn)
+		if conn != nil{
+			conn.Close()
+		}
+		return conn
 	} else {
 		return nil
 	}

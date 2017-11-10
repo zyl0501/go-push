@@ -8,10 +8,13 @@ import (
 	"strings"
 	log "github.com/alecthomas/log4go"
 	"github.com/zyl0501/go-push/common/security"
+	"github.com/zyl0501/go-push/core/connection"
 )
 
 type HandshakeHandler struct {
 	baseMessageHandler
+
+	ConnectionManager connection.ServerConnectionManager
 }
 
 func (handler *HandshakeHandler) Decode(packet protocol.Packet, conn api.Conn) api.Message {
@@ -31,6 +34,7 @@ func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 		errMsg := message.NewErrorMessage(msg)
 		errMsg.Reason = "Param invalid"
 		errMsg.Close()
+		handler.ConnectionManager.RemoveAndClose(m.GetConnection().GetId())
 		log.Error("handshake failure, message=%v, conn=%v", msg, msg.GetConnection());
 		return
 	}
