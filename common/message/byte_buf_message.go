@@ -58,8 +58,8 @@ func (msg *ByteBufMessage) Send() {
 	writer.Write(protocol.EncodePacket(msg.GetPacket()))
 }
 
-func (message *ByteBufMessage) decodeBaseMessage(body []byte) {
-	message.decodeByteBufMessage(bytes.NewReader(body))
+func (msg *ByteBufMessage) decodeBaseMessage(body []byte) {
+	msg.decodeByteBufMessage(bytes.NewReader(body))
 }
 
 func (msg *ByteBufMessage) encodeBaseMessage() ([]byte) {
