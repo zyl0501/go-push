@@ -3,6 +3,7 @@ package protocol
 import (
 	"encoding/binary"
 	"bytes"
+	"sync/atomic"
 )
 
 //length(4)+cmd(1)+cc(2)+flags(1)+sessionId(4)+lrc(1)+body(n)
@@ -28,6 +29,10 @@ const (
 	FLAG_BIZ_ACK   = 4
 	FLAG_AUTO_ACK  = 8
 	FLAG_JSON_BODY = 16
+)
+
+var(
+	id_seq uint32
 )
 
 type Packet struct {
@@ -112,17 +117,11 @@ func EncodePacket(packet Packet) []byte {
 	if bodyLength > 0 {
 		copy(buf[13:], packet.Body)
 	}
-
-	//buf[0:4] = int32ToBytes(bodyLength)
-	//buf[4] = packet.Cmd
-	//buf[5:7] = int16ToBytes(packet.Cc)
-	//buf[7] = packet.Flags
-	//buf[8:12] = int32ToBytes(packet.SessionId)
-	//buf[12] = packet.Lrc
-	//if bodyLength > 0 {
-	//	buf[13:] = packet.Body
-	//}
 	return buf
+}
+
+func GetSessionId() uint32{
+	return atomic.AddUint32(&id_seq, 1)
 }
 
 //整形转换成字节

@@ -30,15 +30,17 @@ func (msg *BaseMessage) DecodeBody() {
 	}
 
 	packet.Body = tmp
-	msg.DecodeBaseMessage(packet.Body)
+	msg.decodeBaseMessage(packet.Body)
 	packet.Body = nil // 释放内存
 }
 
 func (msg *BaseMessage) EncodeBody() {
-	tmp := msg.EncodeBaseMessage();
+	tmp := msg.encodeBaseMessage();
 	if len(tmp) > 0 {
 		//1.压缩
 		//2.加密
+
+		msg.Pkt.Body = tmp
 	}
 }
 
@@ -53,7 +55,6 @@ func (msg *BaseMessage) Send() {
 }
 
 type baseMessageCodec interface {
-	DecodeBaseMessage(body []byte)
-
-	EncodeBaseMessage() ([]byte)
+	decodeBaseMessage(body []byte)
+	encodeBaseMessage() ([]byte)
 }

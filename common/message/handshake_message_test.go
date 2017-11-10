@@ -7,10 +7,22 @@ import (
 
 func TestNewHandshakeMessage(t *testing.T) {
 	packet := protocol.Packet{}
-	msg := NewHandshakeMessage(packet,nil)
-	msg.ByteBufMessage.DecodeBody()
-	msg.DecodeByteBufMessage(nil)
+	packet.Cmd = protocol.PUSH
+	packet.Cc = 22
+	packet.Lrc = 4
+	packet.Flags = 2
+	packet.SessionId = 234
+	msg := NewHandshakeMessage(packet, nil)
+	msg.OsVersion = "1.0.1"
+	msg.OsName = "android"
+	msg.EncodeBody()
 
-	msg2 := ByteBufMessage{}
-	msg2.DecodeBody()
+	msg.OsVersion = ""
+	msg.OsName = ""
+	msg.DecodeBody()
+	if msg.OsName == "android" && msg.OsVersion == "1.0.1"{
+		t.Log("OK")
+	}else{
+		t.Error("Failure")
+	}
 }

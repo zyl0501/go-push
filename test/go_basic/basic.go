@@ -9,8 +9,6 @@ import (
 	"io"
 	"encoding/json"
 	"encoding/binary"
-	"github.com/zyl0501/go-push/api/protocol"
-	"github.com/zyl0501/go-push/common/message"
 )
 
 const (
@@ -25,6 +23,21 @@ const (
 	Unknown2   //-1
 )
 
+type oo struct {
+inner
+ss1 string
+ss2 int
+ss3 bool
+}
+
+type inner struct {
+	ss4 string
+}
+
+func (i *inner) testMethod(){
+	fmt.Println("testMethod is called!!!")
+}
+
 func main() {
 	//mapTest()
 	//enumTest()
@@ -32,7 +45,15 @@ func main() {
 	//bufReadWrite()
 	//jsonTest()
 	//appendTest()
-	binaryTest()
+	//binaryTest()
+	//extendTest()
+
+	oo1 := new(oo)
+	fmt.Println("ss4无值："+oo1.ss4)
+	oo1.ss4 = "abc"
+	fmt.Println("ss4已赋值"+oo1.ss4)
+	oo1.testMethod()//继承调用
+	oo1.inner.testMethod()//继承调用 这里也可以重写
 }
 func mapTest() {
 	var pc map[string]string
@@ -159,17 +180,17 @@ func chanTest3() {
 	<-sign
 }
 
-func chanTest4(){
+func chanTest4() {
 	unbufChan := make(chan int)
 	sign := make(chan byte, 2)
 
-	go func(){
+	go func() {
 		for i := 0; i < 10; i++ {
 			select {
 			case unbufChan <- i:
 			case unbufChan <- i + 10:
-			//default:
-			//	fmt.Println("default!")
+				//default:
+				//	fmt.Println("default!")
 			}
 			time.Sleep(time.Second)
 		}
@@ -178,7 +199,7 @@ func chanTest4(){
 		sign <- 0
 	}()
 
-	go func(){
+	go func() {
 	loop:
 		for {
 			select {
@@ -187,14 +208,14 @@ func chanTest4(){
 					fmt.Println("Closed channel.")
 					break loop
 				}
-				fmt.Printf("e: %d\n",e)
+				fmt.Printf("e: %d\n", e)
 				time.Sleep(2 * time.Second)
 			}
 		}
 		sign <- 1
 	}()
-	<- sign
-	<- sign
+	<-sign
+	<-sign
 }
 
 func f1(c, quit chan int) {
@@ -217,16 +238,14 @@ func f1(c, quit chan int) {
 	fmt.Println("444")
 }
 
-func bufReadWrite(){
+func bufReadWrite() {
 	// 1: 使用bufio.NewReader构造一个reader
 	inputReadBuf := strings.NewReader("1234567890")
 	reader := bufio.NewReader(inputReadBuf)
 
-
 	// 2: 使用bufio.NewWriter构造一个writer
 	buf := bytes.NewBuffer(make([]byte, 0))
 	writer := bufio.NewWriter(buf)
-
 
 	// 3: 函数Peek函数: 返回缓存的一个Slice(引用,不是拷贝)，引用缓存中前n字节数据
 	// > 如果引用的数据长度小于 n，则返回一个错误信息
@@ -245,7 +264,6 @@ func bufReadWrite(){
 	writer.Flush()
 	fmt.Println("buf(Changed): ", buf, "\ninputReadBuf(Not Changed): ", inputReadBuf)
 
-
 	// 4: Read函数, 每次读取一定量的数据, 这个由buf大小觉得, 所以我们可以循环读取数据, 直到Read返回0说明读取数据结束
 	for {
 		b1 := make([]byte, 3)
@@ -255,7 +273,6 @@ func bufReadWrite(){
 		}
 		fmt.Println(n1, string(b1))
 	}
-
 
 	// 5: ReadByte和UnreadByte函数
 	// ReadByte 从 b 中读出一个字节并返回, 如果 b 中无可读数据，则返回一个错误
@@ -269,7 +286,6 @@ func bufReadWrite(){
 	reader2.UnreadByte()
 	b2, _ = reader2.ReadByte()
 	fmt.Println(string(b2))
-
 
 	// 6: ReadRune和UnreadRune函数, 类似上面两个函数
 	// ReadRune读出一个 UTF8 编码的字符并返回编码长度, 如果UTF8序列无法解码出一个正确的Unicode字符, 则只读出b中的一个字节，size 返回 1
@@ -287,7 +303,6 @@ func bufReadWrite(){
 	if err3 != nil {
 		fmt.Println("ERR")
 	}
-
 
 	// 7: 读取缓冲区中数据字节数(只有执行读才会使用到缓冲区, 否则是没有的)
 	inputReadBuf4 := strings.NewReader("中文1234567890")
@@ -312,7 +327,6 @@ func bufReadWrite(){
 	reader4.ReadRune()
 	fmt.Println(reader4.Buffered())
 
-
 	// 8: ReadSlice查找 delim 并返回 delim 及其之前的所有数据的切片, 该操作会读出数据，返回的切片是已读出数据的"引用"
 	// 如果 ReadSlice 在找到 delim 之前遇到错误, 则读出缓存中的所有数据并返回，同时返回遇到error（通常是 io.EOF）
 	// 如果 在整个缓存中都找不到 delim，则返回 ErrBufferFull
@@ -321,15 +335,14 @@ func bufReadWrite(){
 	// 不推荐!
 	inputReadBuf5 := strings.NewReader("中文123 4567 890")
 	reader5 := bufio.NewReader(inputReadBuf5)
-	for ; ;  {
-		b5 , err := reader5.ReadSlice(' ')
+	for ; ; {
+		b5, err := reader5.ReadSlice(' ')
 		fmt.Println(string(b5))
 		// 读到最后
 		if err == io.EOF {
 			break
 		}
 	}
-
 
 	// 9: ReadLine 是一个低级的原始的行读取操作, 一般应该使用 ReadBytes('\n') 或 ReadString('\n')
 	// ReadLine 通过调用 ReadSlice 方法实现，返回的也是"引用", 回一行数据，不包括行尾标记（\n 或 \r\n）
@@ -339,7 +352,7 @@ func bufReadWrite(){
 	// 不推荐!
 	inputReadBuf6 := strings.NewReader("中文123\n4567\n890")
 	reader6 := bufio.NewReader(inputReadBuf6)
-	for ; ;  {
+	for ; ; {
 		l, p, err := reader6.ReadLine()
 		fmt.Println(string(l), p, err)
 		if err == io.EOF {
@@ -347,14 +360,13 @@ func bufReadWrite(){
 		}
 	}
 
-
 	// 10: ReadBytes查找 delim 并读出 delim 及其之前的所有数据
 	// 如果 ReadBytes 在找到 delim 之前遇到错误, 则返回遇到错误之前的所有数据，同时返回遇到的错误（通常是 io.EOF）
 	// 如果 ReadBytes 找不到 delim 时，err != nil
 	// 返回的是数据的copy, 不是引用
 	inputReadBuf7 := strings.NewReader("中文123;4567;890")
 	reader7 := bufio.NewReader(inputReadBuf7)
-	for ; ;  {
+	for ; ; {
 		line, err := reader7.ReadBytes(';')
 		fmt.Println(string(line))
 		if err != nil {
@@ -362,18 +374,16 @@ func bufReadWrite(){
 		}
 	}
 
-
 	// 11: ReadString返回的是字符串, 不是bytes
 	inputReadBuf8 := strings.NewReader("中文123;4567;890")
 	reader8 := bufio.NewReader(inputReadBuf8)
-	for ; ;  {
+	for ; ; {
 		line, err := reader8.ReadString(';')
 		fmt.Println(line)
 		if err != nil {
 			break
 		}
 	}
-
 
 	//12: Flush函数用于提交数据, 立即更新
 	// Available函数返回缓存中的可用空间
@@ -388,7 +398,6 @@ func bufReadWrite(){
 	writer10.Flush()
 	fmt.Println(writer10.Available(), writer10.Buffered(), b10)
 
-
 	// 13: WriteString(...), Write(...), WriteByte(...), WriteRune(...)函数
 	// 都是写数据函数
 	b11 := bytes.NewBuffer(make([]byte, 1024))
@@ -402,14 +411,12 @@ func bufReadWrite(){
 	writer11.Flush()
 	fmt.Println(b11)
 
-
 	// 14: WriteTo函数
 	inputReadBuf9 := strings.NewReader("中文1234567890")
 	reader9 := bufio.NewReader(inputReadBuf9)
 	b9 := bytes.NewBuffer(make([]byte, 0))
 	reader9.WriteTo(b9)
 	fmt.Println(b9)
-
 
 	// 15: ReadFrom函数
 	inputReadBuf15 := strings.NewReader("率哪来的顺丰内部了第三方吧")
@@ -419,7 +426,7 @@ func bufReadWrite(){
 	fmt.Println(b15)
 }
 
-func jsonTest(){
+func jsonTest() {
 	type Test struct {
 		A string
 		B string
@@ -440,7 +447,7 @@ func jsonTest(){
 	fmt.Printf("%+v", out)
 }
 
-func appendTest(){
+func appendTest() {
 	//a := []byte("hello")
 	b := []byte("bbbb")
 	//s := "world"
@@ -452,18 +459,79 @@ func appendTest(){
 	fmt.Printf("%s", b)
 }
 
-func append2(buf []byte){
+func append2(buf []byte) {
 	buf = append(buf, "2222"...)
 }
 
-func binaryTest(){
+func binaryTest() {
 	b11 := bytes.NewBuffer(make([]byte, 0, 2))
 	writer := bufio.NewWriter(b11)
-	binary.Write(writer,binary.BigEndian, uint16(23))
+	binary.Write(writer, binary.BigEndian, uint16(23))
 	writer.Flush()
 
 	bb := b11.Bytes()
 	var result uint16
-	binary.Read(bytes.NewReader(bb),binary.BigEndian, &result)
-	fmt.Println("result: ",result)
+	binary.Read(bytes.NewReader(bb), binary.BigEndian, &result)
+	fmt.Println("result: ", result)
+}
+
+func extendTest() {
+	byteMessage := ByteBufMessage{}
+	byteMessage.baseCodec = byteMessage
+	byteMessage.Encode()
+}
+
+type IMessage interface {
+	Decode()
+	Encode()
+}
+
+type BaseMessage struct {
+	IMessage
+	baseCodec BaseMessageCodec
+}
+
+type BaseMessageCodec interface {
+	DecodeBaseMessage()
+	EncodeBaseMessage()
+}
+
+func (message BaseMessage) Decode() {
+	message.baseCodec.DecodeBaseMessage()
+}
+
+func (message BaseMessage) Encode() {
+	message.baseCodec.EncodeBaseMessage()
+}
+
+//func (message *BaseMessage) DecodeBaseMessage() {
+//	fmt.Println("BaseMessage DecodeBaseMessage")
+//}
+//
+//func (message *BaseMessage) EncodeBaseMessage() {
+//	fmt.Println("BaseMessage EncodeBaseMessage")
+//}
+
+type ByteBufMessage struct {
+	BaseMessage
+	ByteBufMessageCodec
+}
+
+//func (message *ByteBufMessage) Encode() {
+//	message.BaseMessage.Encode()
+//}
+
+func (message ByteBufMessage) DecodeBaseMessage() {
+	fmt.Println("ByteBufMessage DecodeBaseMessage")
+	//message.DecodeByteBufMessage(nil)
+}
+
+func (message ByteBufMessage) EncodeBaseMessage() {
+	fmt.Println("ByteBufMessage EncodeBaseMessage")
+	//message.EncodeByteBufMessage(nil)
+}
+
+type ByteBufMessageCodec interface {
+	DecodeByteBufMessage(reader io.Reader)
+	EncodeByteBufMessage(writer io.Writer)
 }

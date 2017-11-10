@@ -6,28 +6,73 @@ import (
 	"io"
 	"bytes"
 	"bufio"
+	"github.com/zyl0501/go-push/api/protocol"
+	"github.com/zyl0501/go-push/api"
 )
 
 type ByteBufMessage struct {
-	BaseMessage
 	byteBufMessageCodec
+
+	Pkt        protocol.Packet
+	Connection api.Conn
 }
 
-func (message *ByteBufMessage) DecodeBaseMessage(body []byte) {
-	message.DecodeByteBufMessage(bytes.NewReader(body))
+func (msg *ByteBufMessage) GetConnection() api.Conn {
+	return msg.Connection
 }
 
-func (message *ByteBufMessage) EncodeBaseMessage() ([]byte) {
+func (msg *ByteBufMessage) DecodeBody() {
+	packet := msg.GetPacket()
+
+	//1.解密
+	tmp := packet.Body;
+	//2.解压
+
+	if len(tmp) == 0 {
+		//"message decode ex"
+		return
+	}
+
+	packet.Body = tmp
+	msg.decodeBaseMessage(packet.Body)
+	packet.Body = nil // 释放内存
+}
+
+func (msg *ByteBufMessage) EncodeBody() {
+	tmp := msg.encodeBaseMessage();
+	if len(tmp) > 0 {
+		//1.压缩
+		//2.加密
+
+		msg.Pkt.Body = tmp
+	}
+}
+
+func (msg *ByteBufMessage) GetPacket() protocol.Packet {
+	return msg.Pkt
+}
+
+func (msg *ByteBufMessage) Send() {
+	msg.EncodeBody()
+	writer := bufio.NewWriter(msg.GetConnection().GetConn())
+	writer.Write(protocol.EncodePacket(msg.GetPacket()))
+}
+
+func (message *ByteBufMessage) decodeBaseMessage(body []byte) {
+	message.decodeByteBufMessage(bytes.NewReader(body))
+}
+
+func (msg *ByteBufMessage) encodeBaseMessage() ([]byte) {
 	buf := bytes.NewBuffer(make([]byte, 0))
 	writer := bufio.NewWriter(buf)
-	message.EncodeByteBufMessage(writer)
+	msg.encodeByteBufMessage(writer)
 	writer.Flush()
 	return buf.Bytes()
 }
 
 type byteBufMessageCodec interface {
-	DecodeByteBufMessage(reader io.Reader)
-	EncodeByteBufMessage(writer io.Writer)
+	decodeByteBufMessage(reader io.Reader)
+	encodeByteBufMessage(writer io.Writer)
 }
 
 //***********************Encode/Decode method***********************
@@ -41,7 +86,7 @@ func EncodeBytes(writer io.Writer, field []byte) {
 	if fieldLen == 0 {
 		EncodeInt16(writer, 0)
 	} else if fieldLen < math.MaxInt16 {
-		EncodeInt16(writer, fieldLen)
+		EncodeInt16(writer, int16(fieldLen))
 		encodeBytes(writer, field)
 	} else {
 		EncodeInt16(writer, math.MaxInt16)
@@ -50,24 +95,24 @@ func EncodeBytes(writer io.Writer, field []byte) {
 	}
 }
 
-func EncodeInt16(writer io.Writer, field interface{}) {
-	encode(writer, field.(int16))
+func EncodeInt16(writer io.Writer, field int16) {
+	encode(writer, field)
 }
 
-func EncodeInt32(writer io.Writer, field interface{}) {
-	encode(writer, field.(int32))
+func EncodeInt32(writer io.Writer, field int32) {
+	encode(writer, field)
 }
 
-func EncodeInt64(writer io.Writer, field interface{}) {
-	encode(writer, field.(int64))
+func EncodeInt64(writer io.Writer, field int64) {
+	encode(writer, field)
 }
 
-func EncodeByte(writer io.Writer, field interface{}) {
-	encode(writer, field.(byte))
+func EncodeByte(writer io.Writer, field byte) {
+	encode(writer, field)
 }
 
-func encodeBytes(writer io.Writer, field interface{}) {
-	encode(writer, field.([]byte))
+func encodeBytes(writer io.Writer, field []byte) {
+	encode(writer, field)
 }
 
 func encode(writer io.Writer, field interface{}) {
@@ -96,28 +141,28 @@ func DecodeBytes(reader io.Reader) (field []byte) {
 }
 
 func DecodeInt16(reader io.Reader) (field int16) {
-	decode(reader, field)
+	decode(reader, &field)
 	return field
 }
 func DecodeInt32(reader io.Reader) (field int32) {
-	decode(reader, field)
+	decode(reader, &field)
 	return field
 }
 func DecodeInt64(reader io.Reader) (field int64) {
-	decode(reader, field)
+	decode(reader, &field)
 	return field
 }
 func DecodeByte(reader io.Reader) (field byte) {
-	decode(reader, field)
+	decode(reader, &field)
 	return field
 }
 
 func decodeBytes(reader io.Reader, len int32) ([]byte) {
 	field := make([]byte, len)
-	decode(reader, field)
+	decode(reader, &field)
 	return field
 }
 
 func decode(reader io.Reader, field interface{}) {
-	binary.Read(reader, binary.BigEndian, &field)
+	binary.Read(reader, binary.BigEndian, field)
 }
