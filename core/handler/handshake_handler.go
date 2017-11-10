@@ -11,29 +11,27 @@ import (
 )
 
 type HandshakeHandler struct {
-	baseHandler baseMessageHandler
+	baseMessageHandler
 }
 
-func (handler *HandshakeHandler) Handle(packet protocol.Packet, conn api.Conn) {
-	handler.baseHandler.Handle(packet, conn)
-}
-
-func (handler *HandshakeHandler) Decode(packet protocol.Packet, conn api.Conn) api.Message{
+func (handler *HandshakeHandler) Decode(packet protocol.Packet, conn api.Conn) api.Message {
 	return message.NewHandshakeMessage(packet, conn)
 }
 
-func (handler *HandshakeHandler) HandleMessage(m api.Message){
+func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 	msg := message.HandshakeMessage(m)
 
-	iv := msg.Iv;                  //AES密钥向量16位
-	clientKey := msg.ClientKey;    //客户端随机数16位
-	serverKey := security.CipherBoxIns.RandomAESKey();  //服务端随机数16位
+	iv := msg.Iv;                                                     //AES密钥向量16位
+	clientKey := msg.ClientKey;                                       //客户端随机数16位
+	serverKey := security.CipherBoxIns.RandomAESKey();                //服务端随机数16位
 	sessionKey := security.CipherBoxIns.MixKey(clientKey, serverKey); //会话密钥16位
 
 	//1.校验客户端消息字段
 	if len(msg.DeviceId) == 0 || len(iv) != security.CipherBoxIns.AesKeyLength || len(clientKey) != security.CipherBoxIns.AesKeyLength {
-		message.ErrorMessage{}.from(msg).setReason("Param invalid").close();
-		log.Error("handshake failure, message={}, conn={}", msg, msg.GetConnection());
+		errMsg := message.NewErrorMessage(msg)
+		errMsg.Reason = "Param invalid"
+		errMsg.Close()
+		log.Error("handshake failure, message=%v, conn=%v", msg, msg.GetConnection());
 		return
 	}
 	//2.重复握手判断

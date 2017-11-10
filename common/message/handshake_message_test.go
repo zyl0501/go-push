@@ -20,9 +20,9 @@ func TestNewHandshakeMessage(t *testing.T) {
 	msg.OsVersion = ""
 	msg.OsName = ""
 	msg.DecodeBody()
-	if msg.OsName == "android" && msg.OsVersion == "1.0.1"{
+	if msg.OsName == "android" && msg.OsVersion == "1.0.1" {
 		t.Log("OK")
-	}else{
+	} else {
 		t.Error("Failure")
 	}
 }

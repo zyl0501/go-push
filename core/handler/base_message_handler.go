@@ -6,14 +6,14 @@ import (
 )
 
 type baseMessageHandler struct {
-	wrap BaseMessageHandlerWrap
+	BaseMessageHandlerWrap
 }
 
 func (handler *baseMessageHandler) Handle(packet protocol.Packet, conn api.Conn) {
-	msg := handler.wrap.Decode(packet, conn)
+	msg := handler.Decode(packet, conn)
 	if &msg == nil {
 		msg.DecodeBody()
-		handler.wrap.HandleMessage(msg)
+		handler.HandleMessage(msg)
 	}
 }
 

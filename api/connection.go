@@ -18,6 +18,8 @@ type Conn interface {
 	UpdateLastWriteTime()
 	Close()
 	GetConn() net.Conn
+	GetSessionContext() SessionContext
+	SetSessionContext(context SessionContext)
 }
 
 type ConnectionManager interface {
@@ -27,4 +29,21 @@ type ConnectionManager interface {
 	RemoveAndClose(id string) Conn
 	GetConnNum() int
 	Destroy()
+}
+
+type SessionContext struct {
+	DeviceId      string
+	OsName        string
+	OsVersion     string
+	ClientVersion string
+	UserId        string
+	Tags          string
+	Heartbeat     int32
+	ClientType    byte
+	Cipher0       Cipher
+}
+
+type Cipher interface {
+	decrypt(data []byte) []byte
+	encrypt(data []byte) []byte
 }

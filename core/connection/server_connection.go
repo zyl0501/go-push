@@ -17,6 +17,7 @@ type ServerConnection struct {
 	lastReadTime  time.Time
 	lastWriteTime time.Time
 	id            string
+	context       api.SessionContext
 }
 
 func NewServerConnection() (conn *ServerConnection) {
@@ -68,9 +69,13 @@ func (serverConn *ServerConnection) Close() {
 }
 
 func (serverConn *ServerConnection) GetConn() net.Conn {
-	if serverConn.conn != nil {
-		return serverConn.conn
-	} else {
-		return nil
-	}
+	return serverConn.conn
+}
+
+func (serverConn *ServerConnection) GetSessionContext() api.SessionContext {
+	return serverConn.context
+}
+
+func (serverConn *ServerConnection) SetSessionContext(context api.SessionContext) {
+	serverConn.context = context
 }
