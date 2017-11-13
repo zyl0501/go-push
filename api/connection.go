@@ -16,9 +16,9 @@ type Conn interface {
 	IsWriteTimeout() bool
 	UpdateLastReadTime()
 	UpdateLastWriteTime()
-	Close()
+	Close() error
 	GetConn() net.Conn
-	GetSessionContext() SessionContext
+	GetSessionContext() *SessionContext
 	SetSessionContext(context SessionContext)
 }
 
@@ -44,6 +44,6 @@ type SessionContext struct {
 }
 
 type Cipher interface {
-	decrypt(data []byte) []byte
-	encrypt(data []byte) []byte
+	Decrypt(data []byte) ([]byte, error)
+	Encrypt(data []byte) ([]byte, error)
 }

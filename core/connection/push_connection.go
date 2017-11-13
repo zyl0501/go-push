@@ -11,7 +11,7 @@ var (
 	lId = 0
 )
 
-type ServerConnection struct {
+type PushConnection struct {
 	conn          net.Conn
 	status        byte
 	lastReadTime  time.Time
@@ -20,9 +20,9 @@ type ServerConnection struct {
 	context       api.SessionContext
 }
 
-func NewServerConnection() (conn *ServerConnection) {
+func NewPushConnection() (conn *PushConnection) {
 	lId++
-	conn = &ServerConnection{
+	conn = &PushConnection{
 		conn:          nil,
 		status:        api.STATUS_NEW,
 		lastReadTime:  time.Unix(0, 0),
@@ -31,51 +31,53 @@ func NewServerConnection() (conn *ServerConnection) {
 	return conn
 }
 
-func (serverConn *ServerConnection) Init(conn net.Conn) {
+func (serverConn *PushConnection) Init(conn net.Conn) {
 	serverConn.conn = conn
 	serverConn.status = api.STATUS_CONNECTED
 	serverConn.lastReadTime = time.Now()
 	serverConn.lastWriteTime = time.Now()
+	serverConn.context = api.SessionContext{}
 }
 
-func (serverConn *ServerConnection) GetId() string {
+func (serverConn *PushConnection) GetId() string {
 	return serverConn.id
 }
 
-func (serverConn *ServerConnection) IsConnected() bool {
+func (serverConn *PushConnection) IsConnected() bool {
 	return serverConn.status == api.STATUS_CONNECTED
 }
 
-func (serverConn *ServerConnection) IsReadTimeout() bool {
+func (serverConn *PushConnection) IsReadTimeout() bool {
 	return time.Since(serverConn.lastReadTime) > config.Heartbeat
 }
 
-func (serverConn *ServerConnection) IsWriteTimeout() bool {
+func (serverConn *PushConnection) IsWriteTimeout() bool {
 	return time.Since(serverConn.lastReadTime) > config.Heartbeat
 }
 
-func (serverConn *ServerConnection) UpdateLastReadTime() {
+func (serverConn *PushConnection) UpdateLastReadTime() {
 	serverConn.lastReadTime = time.Now()
 }
-func (serverConn *ServerConnection) UpdateLastWriteTime() {
+func (serverConn *PushConnection) UpdateLastWriteTime() {
 	serverConn.lastWriteTime = time.Now()
 }
 
-func (serverConn *ServerConnection) Close() {
+func (serverConn *PushConnection) Close() error{
 	serverConn.status = api.STATUS_DISCONNECTED
 	if serverConn.conn != nil {
-		serverConn.conn.Close()
+		return serverConn.conn.Close()
 	}
+	return nil
 }
 
-func (serverConn *ServerConnection) GetConn() net.Conn {
+func (serverConn *PushConnection) GetConn() net.Conn {
 	return serverConn.conn
 }
 
-func (serverConn *ServerConnection) GetSessionContext() api.SessionContext {
-	return serverConn.context
+func (serverConn *PushConnection) GetSessionContext() *api.SessionContext {
+	return &serverConn.context
 }
 
-func (serverConn *ServerConnection) SetSessionContext(context api.SessionContext) {
+func (serverConn *PushConnection) SetSessionContext(context api.SessionContext) {
 	serverConn.context = context
 }

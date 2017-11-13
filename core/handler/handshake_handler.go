@@ -24,10 +24,11 @@ func NewHandshakeHandler(conn connection.ServerConnectionManager) *HandshakeHand
 }
 
 func (handler *HandshakeHandler) Decode(packet protocol.Packet, conn api.Conn) api.Message {
-	return message.NewHandshakeMessage(packet, conn)
+	return *message.NewHandshakeMessage(packet, conn)
 }
 
 func (handler *HandshakeHandler) HandleMessage(m api.Message) {
+	log.Debug("HandshakeHandler HandleMessage")
 	var msg message.HandshakeMessage
 	msg = m.(message.HandshakeMessage)
 	msg.DecodeBody()

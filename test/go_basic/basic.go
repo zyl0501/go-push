@@ -9,6 +9,8 @@ import (
 	"io"
 	"encoding/json"
 	"encoding/binary"
+	rand2 "math/rand"
+	"math"
 )
 
 const (
@@ -46,7 +48,7 @@ func main() {
 	//jsonTest()
 	//appendTest()
 	//binaryTest()
-	extendTest()
+	//extendTest()
 
 	//oo1 := new(oo)
 	//fmt.Println("ss4无值："+oo1.ss4)
@@ -56,6 +58,7 @@ func main() {
 	//oo1.inner.testMethod()//继承调用 这里也可以重写
 
 	//pointTest2()
+	randomTest()
 }
 func mapTest() {
 	var pc map[string]string
@@ -616,4 +619,11 @@ func pointTest2() {
 	var b LessAdder = &a
 	b.Add(30)
 	fmt.Println(a)
+}
+
+func randomTest(){
+	for i:= 0; i<20;i++ {
+		ii := rand2.Intn(math.MaxInt8)
+		fmt.Println(ii)
+	}
 }

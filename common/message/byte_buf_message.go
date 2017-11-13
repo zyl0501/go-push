@@ -6,16 +6,11 @@ import (
 	"io"
 	"bytes"
 	"bufio"
-	"github.com/zyl0501/go-push/api/protocol"
-	"github.com/zyl0501/go-push/api"
 )
 
 type ByteBufMessage struct {
 	*BaseMessage
 	byteBufMessageCodec
-
-	Pkt        protocol.Packet
-	Connection api.Conn
 }
 
 func (msg *ByteBufMessage) decodeBaseMessage(body []byte) {

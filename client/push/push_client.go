@@ -24,8 +24,8 @@ func (client *PushClient) Send(context push.PushContext) (push.PushResult){
 	data2 := make([]byte,len(data)*2)
 	copy(data2[0:len(data)], data)
 	copy(data2[len(data):], data)
-	conn.Write(data2[0:18])
-	conn.Write(data2[18:])
+	conn.GetConn().Write(data2[0:18])
+	conn.GetConn().Write(data2[18:])
 	return push.PushResult{}
 }
 

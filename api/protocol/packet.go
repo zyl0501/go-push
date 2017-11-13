@@ -8,7 +8,7 @@ import (
 
 //length(4)+cmd(1)+cc(2)+flags(1)+sessionId(4)+lrc(1)+body(n)
 
-var(
+var (
 	id_seq uint32
 )
 
@@ -33,7 +33,9 @@ func (packet *Packet) HasFlag(flag byte) bool {
 	return (packet.Flags & flag) != 0;
 }
 
-func NewPacket(cmd uint8, sessionId uint32) (*Packet){}
+func (packet *Packet) AddFlag(flag byte) {
+	packet.Flags = packet.Flags | flag
+}
 
 func DecodePacket(buf []byte) (Packet, uint32) {
 	bodyLength := buf[0:4]
@@ -72,7 +74,7 @@ func EncodePacket(packet Packet) []byte {
 	return buf
 }
 
-func GetSessionId() uint32{
+func GetSessionId() uint32 {
 	return atomic.AddUint32(&id_seq, 1)
 }
 

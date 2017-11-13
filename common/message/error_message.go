@@ -40,6 +40,6 @@ func NewErrorMessage(msg api.Message) *ErrorMessage {
 	conn := msg.GetConnection()
 	result.Code = protocol.ERROR
 	result.Cmd = packet.Cmd
-	result.ByteBufMessage = ByteBufMessage{Pkt: packet, Connection: conn, byteBufMessageCodec: &result}
+	result.ByteBufMessage = ByteBufMessage{BaseMessage: &BaseMessage{Pkt: packet, Connection: conn}, byteBufMessageCodec: &result}
 	return &result
 }

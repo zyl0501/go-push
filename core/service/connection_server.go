@@ -74,7 +74,7 @@ func (server *ConnectionServer) listen() {
 	}
 }
 func (server *ConnectionServer) handlerMessage(conn net.Conn) {
-	serverConn := connection.NewServerConnection()
+	serverConn := connection.NewPushConnection()
 	serverConn.Init(conn)
 	server.connManager.Add(serverConn)
 

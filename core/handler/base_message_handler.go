@@ -11,7 +11,7 @@ type baseMessageHandler struct {
 
 func (handler *baseMessageHandler) Handle(packet protocol.Packet, conn api.Conn) {
 	msg := handler.Decode(packet, conn)
-	if &msg == nil {
+	if msg != nil {
 		msg.DecodeBody()
 		handler.HandleMessage(msg)
 	}
