@@ -1,9 +1,5 @@
 package push
 
 type PushSender interface {
-
-}
-
-func CreateSender() {
-
+	Send(context PushContext) (PushResult)
 }

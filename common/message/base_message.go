@@ -7,7 +7,6 @@ import (
 )
 
 type BaseMessage struct {
-	api.Message
 	baseMessageCodec
 	Pkt        protocol.Packet
 	Connection api.Conn
@@ -20,8 +19,9 @@ func (msg *BaseMessage) GetConnection() api.Conn {
 func (msg *BaseMessage) DecodeBody() {
 	packet := msg.GetPacket()
 
-	//1.解密
+
 	tmp := packet.Body;
+	//1.解密
 	//2.解压
 
 	if len(tmp) == 0 {
@@ -52,6 +52,17 @@ func (msg *BaseMessage) Send() {
 	msg.EncodeBody()
 	writer := bufio.NewWriter(msg.GetConnection().GetConn())
 	writer.Write(protocol.EncodePacket(msg.GetPacket()))
+}
+
+func (msg *ByteBufMessage) sendRaw() {
+	msg.encodeRaw()
+	writer := bufio.NewWriter(msg.GetConnection().GetConn())
+	writer.Write(protocol.EncodePacket(msg.GetPacket()))
+}
+
+func (msg *ByteBufMessage) encodeRaw() {
+	tmp := msg.encodeBaseMessage()
+	msg.Pkt.Body = tmp
 }
 
 type baseMessageCodec interface {

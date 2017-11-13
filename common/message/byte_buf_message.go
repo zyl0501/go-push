@@ -11,51 +11,11 @@ import (
 )
 
 type ByteBufMessage struct {
+	*BaseMessage
 	byteBufMessageCodec
 
 	Pkt        protocol.Packet
 	Connection api.Conn
-}
-
-func (msg *ByteBufMessage) GetConnection() api.Conn {
-	return msg.Connection
-}
-
-func (msg *ByteBufMessage) DecodeBody() {
-	packet := msg.GetPacket()
-
-	//1.解密
-	tmp := packet.Body;
-	//2.解压
-
-	if len(tmp) == 0 {
-		//"message decode ex"
-		return
-	}
-
-	packet.Body = tmp
-	msg.decodeBaseMessage(packet.Body)
-	packet.Body = nil // 释放内存
-}
-
-func (msg *ByteBufMessage) EncodeBody() {
-	tmp := msg.encodeBaseMessage();
-	if len(tmp) > 0 {
-		//1.压缩
-		//2.加密
-
-		msg.Pkt.Body = tmp
-	}
-}
-
-func (msg *ByteBufMessage) GetPacket() protocol.Packet {
-	return msg.Pkt
-}
-
-func (msg *ByteBufMessage) Send() {
-	msg.EncodeBody()
-	writer := bufio.NewWriter(msg.GetConnection().GetConn())
-	writer.Write(protocol.EncodePacket(msg.GetPacket()))
 }
 
 func (msg *ByteBufMessage) decodeBaseMessage(body []byte) {
@@ -68,17 +28,6 @@ func (msg *ByteBufMessage) encodeBaseMessage() ([]byte) {
 	msg.encodeByteBufMessage(writer)
 	writer.Flush()
 	return buf.Bytes()
-}
-
-func (msg *ByteBufMessage) sendRaw() {
-	msg.encodeRaw()
-	writer := bufio.NewWriter(msg.GetConnection().GetConn())
-	writer.Write(protocol.EncodePacket(msg.GetPacket()))
-}
-
-func (msg *ByteBufMessage) encodeRaw() {
-	tmp := msg.encodeBaseMessage()
-	msg.Pkt.Body = tmp
 }
 
 type byteBufMessageCodec interface {

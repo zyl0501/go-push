@@ -4,7 +4,6 @@ import (
 	"io"
 	"github.com/zyl0501/go-push/api"
 	"github.com/zyl0501/go-push/api/protocol"
-	"bufio"
 )
 
 type ErrorMessage struct {

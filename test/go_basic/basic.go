@@ -46,14 +46,16 @@ func main() {
 	//jsonTest()
 	//appendTest()
 	//binaryTest()
-	//extendTest()
+	extendTest()
 
-	oo1 := new(oo)
-	fmt.Println("ss4无值："+oo1.ss4)
-	oo1.ss4 = "abc"
-	fmt.Println("ss4已赋值"+oo1.ss4)
-	oo1.testMethod()//继承调用
-	oo1.inner.testMethod()//继承调用 这里也可以重写
+	//oo1 := new(oo)
+	//fmt.Println("ss4无值："+oo1.ss4)
+	//oo1.ss4 = "abc"
+	//fmt.Println("ss4已赋值"+oo1.ss4)
+	//oo1.testMethod()//继承调用
+	//oo1.inner.testMethod()//继承调用 这里也可以重写
+
+	//pointTest2()
 }
 func mapTest() {
 	var pc map[string]string
@@ -476,9 +478,35 @@ func binaryTest() {
 }
 
 func extendTest() {
-	byteMessage := ByteBufMessage{}
-	byteMessage.baseCodec = byteMessage
-	byteMessage.Encode()
+	baseMessage := BaseMessage{nil, "baseMessage1"}
+	byteMessage := ByteBufMessage{&baseMessage, nil,"byteBufMessage1"}
+	okMessage := OKMessage{&byteMessage, "okMessage1"}
+
+	//baseMessage2 := BaseMessage{nil, "baseMessage2"}
+	//byteMessage2 := ByteBufMessage{&baseMessage2, nil,"byteBufMessage2"}
+	//okMessage2 := OKMessage{&byteMessage2, "okMessage2"}
+
+	okMessage.BaseMessageCodec = okMessage
+	okMessage.ByteBufMessageCodec = &okMessage
+
+	//baseMessage.BaseMessageCodec = &byteMessage
+	//byteMessage.ByteBufMessageCodec = &okMessage
+	//okMessage.BaseMessage.BaseMessageCodec = &byteMessage2
+	//okMessage.ByteBufMessage.ByteBufMessageCodec = &okMessage2
+
+	//baseMessage2 := BaseMessage{nil, "baseMessage2"}
+	//byteMessage2 := ByteBufMessage{&baseMessage2, nil,"byteBufMessage2"}
+	//okMessage2 := OKMessage{&byteMessage2, "okMessage2"}
+	//baseMessage2.BaseMessageCodec = byteMessage2
+	//byteMessage2.ByteBufMessageCodec = okMessage2
+
+	//okMessage.BaseMessage = baseMessage2
+	//byteMessage2.ByteBufMessageCodec = okMessage
+	//okMessage.BaseMessageCodec = byteMessage2
+	//okMessage.BaseMessage.BaseMessageCodec = byteMessage2
+	//baseMessage.BaseMessageCodec = byteMessage2
+
+	okMessage.Encode()
 }
 
 type IMessage interface {
@@ -487,8 +515,8 @@ type IMessage interface {
 }
 
 type BaseMessage struct {
-	IMessage
-	baseCodec BaseMessageCodec
+	BaseMessageCodec
+	tag string
 }
 
 type BaseMessageCodec interface {
@@ -497,41 +525,95 @@ type BaseMessageCodec interface {
 }
 
 func (message BaseMessage) Decode() {
-	message.baseCodec.DecodeBaseMessage()
+	fmt.Println(message.tag +" BaseMessage Decode")
+	message.DecodeBaseMessage()
 }
 
 func (message BaseMessage) Encode() {
-	message.baseCodec.EncodeBaseMessage()
+	fmt.Println(message.tag +" BaseMessage Encode")
+	message.BaseMessageCodec.EncodeBaseMessage()
 }
-
-//func (message *BaseMessage) DecodeBaseMessage() {
-//	fmt.Println("BaseMessage DecodeBaseMessage")
-//}
-//
-//func (message *BaseMessage) EncodeBaseMessage() {
-//	fmt.Println("BaseMessage EncodeBaseMessage")
-//}
 
 type ByteBufMessage struct {
-	BaseMessage
+	*BaseMessage
 	ByteBufMessageCodec
-}
 
-//func (message *ByteBufMessage) Encode() {
-//	message.BaseMessage.Encode()
-//}
-
-func (message ByteBufMessage) DecodeBaseMessage() {
-	fmt.Println("ByteBufMessage DecodeBaseMessage")
-	//message.DecodeByteBufMessage(nil)
-}
-
-func (message ByteBufMessage) EncodeBaseMessage() {
-	fmt.Println("ByteBufMessage EncodeBaseMessage")
-	//message.EncodeByteBufMessage(nil)
+	tag string
 }
 
 type ByteBufMessageCodec interface {
-	DecodeByteBufMessage(reader io.Reader)
-	EncodeByteBufMessage(writer io.Writer)
+	DecodeByteBufMessage()
+	EncodeByteBufMessage()
+}
+
+func (message ByteBufMessage) DecodeBaseMessage() {
+	fmt.Println(message.tag +" ByteBufMessage DecodeBaseMessage")
+	message.ByteBufMessageCodec.DecodeByteBufMessage()
+}
+
+func (message ByteBufMessage) EncodeBaseMessage() {
+	fmt.Println(message.tag +" ByteBufMessage EncodeBaseMessage")
+	message.ByteBufMessageCodec.EncodeByteBufMessage()
+}
+
+type OKMessage struct {
+	*ByteBufMessage
+	tag string
+}
+
+func (message *OKMessage) DecodeByteBufMessage() {
+	fmt.Println(message.tag + " OKMessage DecodeByteBufMessage")
+}
+
+func (message *OKMessage) EncodeByteBufMessage() {
+	fmt.Println(message.tag + " OKMessage EncodeByteBufMessage", )
+}
+
+func pointTest(){
+	//m := MyType{value: "something"}
+	//var s Stringer
+	//s = m
+
+	m := MyType{value: "something"}
+	m2 := MyType2{MyType: m}
+
+	var s Stringer
+	s = &m2 // Compile-time error again
+	fmt.Println(s)
+
+	//m := MyType{value: "something"}
+	//
+	//fmt.Println(Stringer(m))
+}
+
+type Stringer interface {
+	String() string
+}
+
+type MyType struct {
+	value string
+}
+
+type MyType2 struct {
+	MyType
+}
+
+func (m *MyType) String() string { return m.value }
+
+type INTEGER int
+func (a *INTEGER) Less(b INTEGER) bool {
+	return *a < b
+}
+func (a *INTEGER) Add(b INTEGER) {
+	*a += b
+}
+type LessAdder interface {
+	Less(INTEGER) bool
+	Add(INTEGER)
+}
+func pointTest2() {
+	var a INTEGER = 100
+	var b LessAdder = &a
+	b.Add(30)
+	fmt.Println(a)
 }

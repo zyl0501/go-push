@@ -8,29 +8,6 @@ import (
 
 //length(4)+cmd(1)+cc(2)+flags(1)+sessionId(4)+lrc(1)+body(n)
 
-const (
-	HeadLength      byte = 13 //packet头部的长度
-	BodyLength      byte = 4
-	CmdLength       byte = 1
-	CCLength        byte = 2
-	FlagsLength     byte = 1
-	SessionIdLength byte = 4
-	LrcLength       byte = 1
-
-	BodyLenIndex   = 0
-	CmdIndex       = 4
-	CCIndex        = 5
-	FlagsIndex     = 6
-	SessionIdIndex = 7
-	LrcIndex       = 11
-
-	FLAG_CRYPTO    = 1
-	FLAG_COMPRESS  = 2
-	FLAG_BIZ_ACK   = 4
-	FLAG_AUTO_ACK  = 8
-	FLAG_JSON_BODY = 16
-)
-
 var(
 	id_seq uint32
 )
@@ -44,34 +21,6 @@ type Packet struct {
 	Body      []byte`json:"body"`
 }
 
-//Packet Cmd
-const (
-	HEARTBEAT            byte = 1 + iota //1
-	HANDSHAKE                            //2
-	LOGIN                                //3
-	LOGOUT                               //4
-	BIND                                 //5
-	UNBIND                               //6
-	FAST_CONNECT                         //7
-	PAUSE                                //8
-	ERROR                                //9
-	OK                                   //10
-	HTTP_PROXY                           //11
-	KICK                                 //12
-	GATEWAY_KICK                         //13
-	PUSH                                 //14
-	GATEWAY_PUSH                         //15
-	NOTIFICATION                         //16
-	GATEWAY_NOTIFICATION                 //17
-	CHAT                                 //18
-	GATEWAY_CHAT                         //19
-	GROUP                                //20
-	GATEWAY_GROUP                        //21
-	ACK                                  //22
-	NACK                                 //23
-	UNKNOWN              = -1            //-1
-)
-
 func (packet *Packet) GetBodyLength() uint32 {
 	if packet.Body == nil {
 		return 0
@@ -83,6 +32,8 @@ func (packet *Packet) GetBodyLength() uint32 {
 func (packet *Packet) HasFlag(flag byte) bool {
 	return (packet.Flags & flag) != 0;
 }
+
+func NewPacket(cmd uint8, sessionId uint32) (*Packet){}
 
 func DecodePacket(buf []byte) (Packet, uint32) {
 	bodyLength := buf[0:4]
@@ -154,3 +105,54 @@ func bytesToInt16(b []byte) uint16 {
 	binary.Read(bytesBuffer, binary.BigEndian, &tmp)
 	return tmp
 }
+
+//Packet Cmd
+const (
+	HEARTBEAT            byte = 1 + iota //1
+	HANDSHAKE                            //2
+	LOGIN                                //3
+	LOGOUT                               //4
+	BIND                                 //5
+	UNBIND                               //6
+	FAST_CONNECT                         //7
+	PAUSE                                //8
+	ERROR                                //9
+	OK                                   //10
+	HTTP_PROXY                           //11
+	KICK                                 //12
+	GATEWAY_KICK                         //13
+	PUSH                                 //14
+	GATEWAY_PUSH                         //15
+	NOTIFICATION                         //16
+	GATEWAY_NOTIFICATION                 //17
+	CHAT                                 //18
+	GATEWAY_CHAT                         //19
+	GROUP                                //20
+	GATEWAY_GROUP                        //21
+	ACK                                  //22
+	NACK                                 //23
+	UNKNOWN              = -1            //-1
+)
+
+const (
+	HeadLength      byte = 13 //packet头部的长度
+	BodyLength      byte = 4
+	CmdLength       byte = 1
+	CCLength        byte = 2
+	FlagsLength     byte = 1
+	SessionIdLength byte = 4
+	LrcLength       byte = 1
+
+	BodyLenIndex   = 0
+	CmdIndex       = 4
+	CCIndex        = 5
+	FlagsIndex     = 6
+	SessionIdIndex = 7
+	LrcIndex       = 11
+
+	FLAG_CRYPTO    = 1
+	FLAG_COMPRESS  = 2
+	FLAG_BIZ_ACK   = 4
+	FLAG_AUTO_ACK  = 8
+	FLAG_JSON_BODY = 16
+)

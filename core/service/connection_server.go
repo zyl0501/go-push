@@ -13,26 +13,25 @@ import (
 )
 
 type ConnectionServer struct {
-	baseServer        service.BaseServer
+	service.BaseServer
 	connManager       connection.ServerConnectionManager
 	messageDispatcher common.MessageDispatcher
 }
 
 func NewConnectionServer() (server ConnectionServer) {
 	return ConnectionServer{
-		baseServer:        service.BaseServer{},
 		connManager:       connection.NewConnectionManager(),
 		messageDispatcher: common.NewMessageDispatcher(),
 	}
 }
 
 func (server *ConnectionServer) Start(listener service.Listener) {
-	server.baseServer.Start(listener)
+	server.BaseServer.Start(listener)
 	server.listen()
 }
 
 func (server *ConnectionServer) Stop(listener service.Listener) {
-	server.baseServer.Stop(listener)
+	server.BaseServer.Stop(listener)
 	server.connManager.Destroy()
 }
 
@@ -45,9 +44,9 @@ func (server *ConnectionServer) SyncStop() (success bool) {
 }
 
 func (server *ConnectionServer) Init() {
-	server.baseServer.Init()
+	server.BaseServer.Init()
 	server.connManager.Init()
-	server.messageDispatcher.Register(protocol.HANDSHAKE, handler.HandshakeHandler{})
+	server.messageDispatcher.Register(protocol.HANDSHAKE, handler.NewHandshakeHandler(server.connManager))
 }
 
 func (server *ConnectionServer) IsRunning() (success bool) {
