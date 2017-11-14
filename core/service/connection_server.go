@@ -49,10 +49,6 @@ func (server *ConnectionServer) Init() {
 	server.messageDispatcher.Register(protocol.HANDSHAKE, handler.NewHandshakeHandler(server.connManager))
 }
 
-func (server *ConnectionServer) IsRunning() (success bool) {
-	return false
-}
-
 func (server *ConnectionServer) listen() {
 	netListen, err := net.Listen("tcp", "localhost:9933")
 	if err != nil {

@@ -24,14 +24,14 @@ func NewHandshakeHandler(conn connection.ServerConnectionManager) *HandshakeHand
 }
 
 func (handler *HandshakeHandler) Decode(packet protocol.Packet, conn api.Conn) api.Message {
-	return *message.NewHandshakeMessage(packet, conn)
+	return message.NewHandshakeMessage(packet, conn)
+	//return &((*message.NewHandshakeMessage(packet, conn)).(api.Message))
 }
 
 func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 	log.Debug("HandshakeHandler HandleMessage")
 	var msg message.HandshakeMessage
 	msg = m.(message.HandshakeMessage)
-	msg.DecodeBody()
 
 	iv := msg.Iv;                                                     //AES密钥向量16位
 	clientKey := msg.ClientKey;                                       //客户端随机数16位
@@ -43,7 +43,7 @@ func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 		errMsg := message.NewErrorMessage(&msg)
 		errMsg.Reason = "Param invalid"
 		errMsg.Send()
-		handler.ConnectionManager.RemoveAndClose(m.GetConnection().GetId())
+		handler.ConnectionManager.RemoveAndClose(msg.GetConnection().GetId())
 		log.Error("handshake failure, message=%v, conn=%v", msg, msg.GetConnection());
 		return
 	}

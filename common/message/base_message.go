@@ -26,7 +26,12 @@ func (msg *BaseMessage) DecodeBody() {
 	if packet.HasFlag(protocol.FLAG_CRYPTO) {
 		cip := msg.Connection.GetSessionContext().Cipher0
 		if cip != nil {
-			tmp, _ = cip.Decrypt(tmp);
+			var err error
+			tmp, err = cip.Decrypt(tmp);
+			if err != nil {
+				log.Error("decrypt error ", err)
+				return
+			}
 		}
 	}
 	//2.解压

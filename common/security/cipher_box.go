@@ -17,13 +17,13 @@ var (
 
 type CipherBox struct {
 	AesKeyLength int
-	privateKey   rsa.PrivateKey
-	publicKey    rsa.PublicKey
+	privateKey   *rsa.PrivateKey
+	publicKey    *rsa.PublicKey
 }
 
 func (cb *CipherBox) PublicKey() (*rsa.PublicKey, error) {
-	if &cb.publicKey == nil {
-		block, _ := pem.Decode(config.PublicKey)
+	if cb.publicKey == nil {
+		block, _ := pem.Decode([]byte(config.PublicKey))
 		if block == nil {
 			return nil, errors.New("public key error")
 		}
@@ -31,14 +31,14 @@ func (cb *CipherBox) PublicKey() (*rsa.PublicKey, error) {
 		if err != nil {
 			return nil, err
 		}
-		cb.publicKey = pubInterface.(rsa.PublicKey)
+		cb.publicKey = pubInterface.(*rsa.PublicKey)
 	}
-	return &cb.publicKey, nil
+	return cb.publicKey, nil
 }
 
 func (cb *CipherBox) PrivateKey() (*rsa.PrivateKey, error) {
-	if &cb.privateKey == nil {
-		block, _ := pem.Decode(config.PrivateKey)
+	if cb.privateKey == nil {
+		block, _ := pem.Decode([]byte(config.PrivateKey))
 		if block == nil {
 			return nil, errors.New("private key error!")
 		}
@@ -46,9 +46,9 @@ func (cb *CipherBox) PrivateKey() (*rsa.PrivateKey, error) {
 		if err != nil {
 			return nil, err
 		}
-		cb.privateKey = *priv
+		cb.privateKey = priv
 	}
-	return &cb.privateKey, nil
+	return cb.privateKey, nil
 }
 
 func (cb *CipherBox) RandomAESKey() ([]byte) {

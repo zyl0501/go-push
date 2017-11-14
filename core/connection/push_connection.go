@@ -5,6 +5,7 @@ import (
 	"github.com/zyl0501/go-push/api"
 	"github.com/zyl0501/go-push/tools/config"
 	"time"
+	"github.com/zyl0501/go-push/common/security"
 )
 
 var (
@@ -37,6 +38,8 @@ func (serverConn *PushConnection) Init(conn net.Conn) {
 	serverConn.lastReadTime = time.Now()
 	serverConn.lastWriteTime = time.Now()
 	serverConn.context = api.SessionContext{}
+	cipher, _ := security.NewRsaCipher()
+	serverConn.context.Cipher0 = cipher
 }
 
 func (serverConn *PushConnection) GetId() string {
@@ -62,7 +65,7 @@ func (serverConn *PushConnection) UpdateLastWriteTime() {
 	serverConn.lastWriteTime = time.Now()
 }
 
-func (serverConn *PushConnection) Close() error{
+func (serverConn *PushConnection) Close() error {
 	serverConn.status = api.STATUS_DISCONNECTED
 	if serverConn.conn != nil {
 		return serverConn.conn.Close()
