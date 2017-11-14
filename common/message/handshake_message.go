@@ -21,7 +21,8 @@ type HandshakeMessage struct {
 }
 
 func NewHandshakeMessage(packet protocol.Packet, conn api.Conn) *HandshakeMessage {
-	baseMessage := BaseMessage{Pkt:packet, Connection: conn}
+	pkt := protocol.Packet{Cmd:protocol.HANDSHAKE, SessionId:packet.SessionId}
+	baseMessage := BaseMessage{Pkt:pkt, Connection: conn}
 	byteMessage := ByteBufMessage{BaseMessage: &baseMessage}
 	msg := HandshakeMessage{ByteBufMessage: &byteMessage}
 	msg.baseMessageCodec = &msg

@@ -3,9 +3,11 @@ package config
 import "time"
 
 var (
-	Heartbeat      = 5 * time.Second
-	Aes_key_length = 16
-	PublicKey      = `
+	MinHeartbeat      = 5 * time.Second
+	MaxHeartbeat      = 10 * time.Second
+	AesKeyLength      = 16
+	SessionExpireTime = 10 * time.Second
+	PublicKey         = `
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZsfv1qscqYdy4vY+P4e3cAtmv
 ppXQcRvrF1cB4drkv0haU24Y7m5qYtT52Kr539RdbKKdLAM6s20lWy7+5C0Dgacd

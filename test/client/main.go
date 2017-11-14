@@ -6,11 +6,9 @@ import (
 
 func main() {
 	connectClient := client.ConnectClient{}
+	pushClient := client.PushClient{ConnClient:connectClient}
 	connectClient.Connect("localhost", 9933)
+	pushClient.Start()
 
-	//pushClient := client.PushClient{connectClient}
-	//pushClient.Send(push.PushContext{})
-
-	//time.Sleep(time.Second * 1000)
 	defer connectClient.Close()
 }

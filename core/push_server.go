@@ -1,17 +1,20 @@
 package core
 
 import (
-	"github.com/zyl0501/go-push/core/service"
 	api "github.com/zyl0501/go-push/api/service"
+	"github.com/zyl0501/go-push/core/session"
+	"github.com/zyl0501/go-push/core/service"
 )
 
 type MPushServer struct {
 	ConnectionServer service.ConnectionServer
+	SessionManager *session.ReusableSessionManager
 }
 
 func NewPushServer() *MPushServer {
-	connectionServer := service.NewConnectionServer()
-	pushServer := MPushServer{connectionServer}
+	pushServer := MPushServer{SessionManager:session.NewReusableSessionManager()}
+	connectionServer := service.NewConnectionServer(&pushServer)
+	pushServer.ConnectionServer = connectionServer
 	return &pushServer
 }
 

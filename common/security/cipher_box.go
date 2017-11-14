@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	CipherBoxIns = CipherBox{AesKeyLength: config.Aes_key_length}
+	CipherBoxIns = CipherBox{AesKeyLength: config.AesKeyLength}
 )
 
 type CipherBox struct {

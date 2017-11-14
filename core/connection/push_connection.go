@@ -51,11 +51,11 @@ func (serverConn *PushConnection) IsConnected() bool {
 }
 
 func (serverConn *PushConnection) IsReadTimeout() bool {
-	return time.Since(serverConn.lastReadTime) > config.Heartbeat
+	return int32(time.Since(serverConn.lastReadTime)) > serverConn.context.Heartbeat
 }
 
 func (serverConn *PushConnection) IsWriteTimeout() bool {
-	return time.Since(serverConn.lastReadTime) > config.Heartbeat
+	return int32(time.Since(serverConn.lastReadTime)) > serverConn.context.Heartbeat
 }
 
 func (serverConn *PushConnection) UpdateLastReadTime() {
