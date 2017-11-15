@@ -3,7 +3,6 @@ package connection
 import (
 	"net"
 	"github.com/zyl0501/go-push/api"
-	"github.com/zyl0501/go-push/tools/config"
 	"time"
 	"github.com/zyl0501/go-push/common/security"
 )

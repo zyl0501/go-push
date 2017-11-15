@@ -9,19 +9,18 @@ import (
 	"github.com/zyl0501/go-push/common/security"
 	"github.com/zyl0501/go-push/core/connection"
 	"github.com/zyl0501/go-push/test/client/config"
-	"github.com/zyl0501/go-push/core"
 	"github.com/zyl0501/go-push/core/session"
 )
 
 type HandshakeHandler struct {
 	*baseMessageHandler
 	ConnectionManager connection.ServerConnectionManager
-	pushServer *core.MPushServer
+	SessionManager    *session.ReusableSessionManager
 }
 
-func NewHandshakeHandler(pushServer *core.MPushServer,connManager connection.ServerConnectionManager) *HandshakeHandler {
+func NewHandshakeHandler(SessionManager *session.ReusableSessionManager, connManager connection.ServerConnectionManager) *HandshakeHandler {
 	baseHandler := &baseMessageHandler{}
-	handler := HandshakeHandler{baseMessageHandler:baseHandler, pushServer:pushServer,ConnectionManager:connManager}
+	handler := HandshakeHandler{baseMessageHandler: baseHandler, SessionManager: SessionManager, ConnectionManager: connManager}
 	handler.BaseMessageHandlerWrap = &handler
 	return &handler
 }
@@ -60,7 +59,7 @@ func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 		return;
 	}
 	//3.更换会话密钥RSA=>AES(clientKey)
-	ctx.Cipher0 = security.AesCipher{clientKey, iv}
+	ctx.Cipher0 = &security.AesCipher{clientKey, iv}
 	//4.生成可复用session, 用于快速重连
 	reusableSession := session.NewSession(*ctx)
 	//5.计算心跳时间
@@ -73,7 +72,7 @@ func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 	okMsg.ExpireTime = reusableSession.ExpireTime
 	okMsg.Send()
 	//7.更换会话密钥AES(clientKey)=>AES(sessionKey)
-	ctx.Cipher0 = security.AesCipher{Key:sessionKey, Iv:iv}
+	ctx.Cipher0 = &security.AesCipher{Key: sessionKey, Iv: iv}
 	//8.保存client信息到当前连接
 	ctx.DeviceId = msg.DeviceId
 	ctx.OsName = msg.OsName
@@ -82,5 +81,5 @@ func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 	ctx.Heartbeat = heartbeat
 	//ctx.ClientType =
 	//9.保存可复用session到Redis, 用于快速重连
-	handler.pushServer.SessionManager.CacheSession(reusableSession)
+	handler.SessionManager.CacheSession(reusableSession)
 }

@@ -13,7 +13,7 @@ type MPushServer struct {
 
 func NewPushServer() *MPushServer {
 	pushServer := MPushServer{SessionManager:session.NewReusableSessionManager()}
-	connectionServer := service.NewConnectionServer(&pushServer)
+	connectionServer := service.NewConnectionServer(pushServer.SessionManager)
 	pushServer.ConnectionServer = connectionServer
 	return &pushServer
 }

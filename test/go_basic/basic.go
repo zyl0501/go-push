@@ -58,7 +58,14 @@ func main() {
 	//oo1.inner.testMethod()//继承调用 这里也可以重写
 
 	//pointTest2()
-	randomTest()
+	//randomTest()
+
+	go func() {
+		fmt.Println("go")
+		time.Sleep(5 * time.Second)
+		fmt.Println("go End")
+	}()
+	defer fmt.Println("Exit")
 }
 func mapTest() {
 	var pc map[string]string
