@@ -13,14 +13,14 @@ import (
 )
 
 type HandshakeHandler struct {
-	*baseMessageHandler
+	*BaseMessageHandler
 	ConnectionManager connection.ServerConnectionManager
 	SessionManager    *session.ReusableSessionManager
 }
 
 func NewHandshakeHandler(SessionManager *session.ReusableSessionManager, connManager connection.ServerConnectionManager) *HandshakeHandler {
-	baseHandler := &baseMessageHandler{}
-	handler := HandshakeHandler{baseMessageHandler: baseHandler, SessionManager: SessionManager, ConnectionManager: connManager}
+	baseHandler := &BaseMessageHandler{}
+	handler := HandshakeHandler{BaseMessageHandler: baseHandler, SessionManager: SessionManager, ConnectionManager: connManager}
 	handler.BaseMessageHandlerWrap = &handler
 	return &handler
 }

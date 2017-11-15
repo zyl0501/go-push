@@ -33,7 +33,6 @@ func (dispatcher *MessageDispatcher) OnReceive(packet protocol.Packet, conn api.
 		if dispatcher.unsupportedPolicy > POLICY_IGNORE {
 			log.Error("dispatch message failure, cmd={} unsupported, packet={}, connect={}, body={}")
 			if dispatcher.unsupportedPolicy == POLICY_REJECT {
-
 			}
 		}
 	}

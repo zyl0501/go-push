@@ -6,13 +6,19 @@ import (
 	log "github.com/alecthomas/log4go"
 	"io"
 	"github.com/zyl0501/go-push/api"
+	"github.com/zyl0501/go-push/common/message"
+	"github.com/zyl0501/go-push/common"
+	"github.com/zyl0501/go-push/sdk-server/push/handler"
 )
 
 type PushClient struct {
 	connClient *ConnectClient
+	messageDispatcher common.MessageDispatcher
 }
 
 func (client *PushClient) Init() {
+	client.messageDispatcher = common.MessageDispatcher{}
+	client.messageDispatcher.Register(protocol.OK, handler.PushUpOKHandler{})
 }
 
 func (client *PushClient) Start() {
@@ -28,26 +34,14 @@ func (client *PushClient) Destroy() {
 
 }
 
-func (client *PushClient) handler(packet *protocol.Packet, conn *api.Conn) {
-	cmd := packet.Cmd
-	switch cmd {
-	case protocol.OK:
-		log.Info("push success: ")
-	}
-}
-
 func (client *PushClient) Send(context push.PushContext) (push.PushResult) {
 	conn := client.connClient.conn
 
-	packet := protocol.Packet{Cmd: protocol.HANDSHAKE}
-	packet.Body = nil
-	data := protocol.EncodePacket(packet)
-
-	data2 := make([]byte, len(data)*2)
-	copy(data2[0:len(data)], data)
-	copy(data2[len(data):], data)
-	conn.GetConn().Write(data2[0:18])
-	conn.GetConn().Write(data2[18:])
+	msg := message.NewPushUpMessage0(conn)
+	msg.UserId = context.UserId
+	msg.Content = []byte(context.Msg.Content)
+	msg.Timeout = context.Timeout
+	msg.Send()
 	return push.PushResult{}
 }
 
@@ -86,7 +80,7 @@ loop:
 							readLen += n
 						} else {
 							packet.Body = body
-							client.handler(&packet, &serverConn)
+							client.messageDispatcher.OnReceive(packet, serverConn)
 							break
 						}
 					}

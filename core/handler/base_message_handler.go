@@ -5,11 +5,11 @@ import (
 	"github.com/zyl0501/go-push/api"
 )
 
-type baseMessageHandler struct {
+type BaseMessageHandler struct {
 	BaseMessageHandlerWrap
 }
 
-func (handler *baseMessageHandler) Handle(packet protocol.Packet, conn api.Conn) {
+func (handler *BaseMessageHandler) Handle(packet protocol.Packet, conn api.Conn) {
 	msg := handler.Decode(packet, conn)
 	if msg != nil {
 		msg.DecodeBody()

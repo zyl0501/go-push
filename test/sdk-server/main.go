@@ -5,6 +5,7 @@ import (
 	"github.com/zyl0501/go-push/sdk-server/push"
 	push2 "github.com/zyl0501/go-push/api/push"
 	"strconv"
+	"fmt"
 )
 
 func main() {
@@ -30,5 +31,9 @@ func FakeBizProcess(pushClient *push.PushClient) {
 		context.ACK = push2.NO_ACK
 
 		pushClient.Send(context)
+
+		fmt.Println("push content_" + strconv.Itoa(index))
+
+		index++
 	}
 }

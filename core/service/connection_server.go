@@ -50,6 +50,7 @@ func (server *ConnectionServer) Init() {
 	server.BaseServer.Init()
 	server.connManager.Init()
 	server.messageDispatcher.Register(protocol.HANDSHAKE, handler.NewHandshakeHandler(server.SessionManager, server.connManager))
+	server.messageDispatcher.Register(protocol.PUSH_UP, handler.NewPushUpHandler())
 }
 
 func (server *ConnectionServer) listen() {

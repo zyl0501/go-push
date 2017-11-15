@@ -124,7 +124,7 @@ const (
 	KICK                                 //12
 	GATEWAY_KICK                         //13
 	PUSH                                 //14
-	GATEWAY_PUSH                         //15
+	PUSH_UP                         //15
 	NOTIFICATION                         //16
 	GATEWAY_NOTIFICATION                 //17
 	CHAT                                 //18

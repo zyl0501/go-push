@@ -79,6 +79,7 @@ func (msg *ByteBufMessage) sendRaw() {
 	msg.encodeRaw()
 	writer := bufio.NewWriter(msg.GetConnection().GetConn())
 	writer.Write(protocol.EncodePacket(msg.GetPacket()))
+	writer.Flush()
 }
 
 func (msg *ByteBufMessage) encodeRaw() {
