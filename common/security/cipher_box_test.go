@@ -30,6 +30,8 @@ func TestRsa(t *testing.T) {
 
 func TestAes(t *testing.T) {
 	cipher := AesCipher{CipherBoxIns.RandomAESKey(), CipherBoxIns.RandomAESIV()}
+	t.Log(cipher.Key)
+	t.Log(cipher.Iv)
 	content := "abc123"
 	result, err := cipher.Encrypt([]byte(content))
 	if err != nil {

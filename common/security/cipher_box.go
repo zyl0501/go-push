@@ -3,12 +3,11 @@ package security
 import (
 	"crypto/rsa"
 	"github.com/zyl0501/go-push/tools/config"
-	"math/rand"
-	"math"
 	"github.com/zyl0501/go-push/tools/utils"
 	"encoding/pem"
 	"errors"
 	"crypto/x509"
+	"crypto/rand"
 )
 
 var (
@@ -54,16 +53,16 @@ func (cb *CipherBox) PrivateKey() (*rsa.PrivateKey, error) {
 func (cb *CipherBox) RandomAESKey() ([]byte) {
 	length := cb.AesKeyLength
 	result := make([]byte, length)
-	for i := 0; i < length; i++ {
-		result[i] = byte(rand.Intn(math.MaxInt8))
+	if _,err := rand.Read(result); err != nil {
+		return nil
 	}
 	return result
 }
 func (cb *CipherBox) RandomAESIV() ([]byte) {
 	length := cb.AesKeyLength
 	result := make([]byte, length)
-	for i := 0; i < length; i++ {
-		result[i] = byte(rand.Intn(math.MaxInt8))
+	if _,err := rand.Read(result); err != nil {
+		return nil
 	}
 	return result
 }
