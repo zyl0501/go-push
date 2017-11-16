@@ -16,8 +16,9 @@ func NewPushCenter() *PushCenter {
 
 func (center *PushCenter) Start() {
 	go func() {
-		select {
-		case msg, ok := <-center.msgQueue:
+		for {
+			msg, ok := <-center.msgQueue
+			log.Debug(ok)
 			if ok {
 				log.Debug("receive server sdk push, now push to client")
 				pushMsg := message.NewPushDownMessage0(msg.GetConnection())

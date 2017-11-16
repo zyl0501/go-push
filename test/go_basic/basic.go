@@ -43,7 +43,7 @@ func (i *inner) testMethod(){
 func main() {
 	//mapTest()
 	//enumTest()
-	//chanTest3()
+	chanTest()
 	//bufReadWrite()
 	//jsonTest()
 	//appendTest()
@@ -58,7 +58,7 @@ func main() {
 	//oo1.inner.testMethod()//继承调用 这里也可以重写
 
 	//pointTest2()
-	randomTest()
+	//randomTest()
 
 	//go func() {
 	//	fmt.Println("go")
@@ -106,11 +106,7 @@ func chanTest() {
 		for i := 0; i < 5; i++ {
 			fmt.Println(<-c)
 		}
-		fmt.Println("111")
 		quit <- 0
-		fmt.Println("222")
-		quit <- 0
-		fmt.Println("333")
 	}()
 	f1(c, quit)
 }
@@ -232,11 +228,9 @@ func chanTest4() {
 
 func f1(c, quit chan int) {
 	x := 1;
-	fmt.Println("555")
 	for {
 		select {
 		case c <- x:
-			fmt.Println("666")
 			x += 1;
 			time.Sleep(time.Second)
 		case <-quit:
@@ -247,7 +241,6 @@ func f1(c, quit chan int) {
 			//return
 		}
 	}
-	fmt.Println("444")
 }
 
 func bufReadWrite() {
