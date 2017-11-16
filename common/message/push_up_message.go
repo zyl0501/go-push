@@ -21,8 +21,8 @@ func NewPushUpMessage(packet protocol.Packet, conn api.Conn) *PushUpMessage {
 	baseMessage := BaseMessage{Pkt:Pkt, Connection: conn}
 	byteMessage := ByteBufMessage{BaseMessage: &baseMessage}
 	msg := PushUpMessage{ByteBufMessage: &byteMessage}
-	msg.baseMessageCodec = &msg
-	msg.byteBufMessageCodec = &msg
+	msg.BaseMessageCodec = &msg
+	msg.ByteBufMessageCodec = &msg
 	return &msg
 }
 
@@ -31,12 +31,12 @@ func NewPushUpMessage0(conn api.Conn) *PushUpMessage {
 	baseMessage := BaseMessage{Pkt:packet, Connection: conn}
 	byteMessage := ByteBufMessage{BaseMessage: &baseMessage}
 	msg := PushUpMessage{ByteBufMessage: &byteMessage}
-	msg.baseMessageCodec = &msg
-	msg.byteBufMessageCodec = &msg
+	msg.BaseMessageCodec = &msg
+	msg.ByteBufMessageCodec = &msg
 	return &msg
 }
 
-func (message *PushUpMessage) decodeByteBufMessage(reader io.Reader) {
+func (message *PushUpMessage) DecodeByteBufMessage(reader io.Reader) {
 	message.UserId = DecodeString(reader)
 	message.ClientType = DecodeInt32(reader)
 	message.Timeout = DecodeInt64(reader)
@@ -44,7 +44,7 @@ func (message *PushUpMessage) decodeByteBufMessage(reader io.Reader) {
 	//message.Tags = DecodeBytes(reader)
 }
 
-func (message *PushUpMessage) encodeByteBufMessage(writer io.Writer) {
+func (message *PushUpMessage) EncodeByteBufMessage(writer io.Writer) {
 	EncodeString(writer, message.UserId)
 	EncodeInt32(writer, message.ClientType)
 	EncodeInt64(writer, message.Timeout)

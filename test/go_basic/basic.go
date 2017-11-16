@@ -58,14 +58,14 @@ func main() {
 	//oo1.inner.testMethod()//继承调用 这里也可以重写
 
 	//pointTest2()
-	//randomTest()
+	randomTest()
 
-	go func() {
-		fmt.Println("go")
-		time.Sleep(5 * time.Second)
-		fmt.Println("go End")
-	}()
-	defer fmt.Println("Exit")
+	//go func() {
+	//	fmt.Println("go")
+	//	time.Sleep(5 * time.Second)
+	//	fmt.Println("go End")
+	//}()
+	//defer fmt.Println("Exit")
 }
 func mapTest() {
 	var pc map[string]string
@@ -629,8 +629,9 @@ func pointTest2() {
 }
 
 func randomTest(){
+	r := rand2.New(rand2.NewSource(time.Now().UnixNano()))
 	for i:= 0; i<20;i++ {
-		ii := rand2.Intn(math.MaxInt8)
+		ii := r.Intn(math.MaxInt8)
 		fmt.Println(ii)
 	}
 }

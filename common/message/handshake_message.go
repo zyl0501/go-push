@@ -21,12 +21,12 @@ type HandshakeMessage struct {
 }
 
 func NewHandshakeMessage(packet protocol.Packet, conn api.Conn) *HandshakeMessage {
-	pkt := protocol.Packet{Cmd:protocol.HANDSHAKE, SessionId:packet.SessionId}
-	baseMessage := BaseMessage{Pkt:pkt, Connection: conn}
+	//pkt := protocol.Packet{Cmd:protocol.HANDSHAKE, SessionId:packet.SessionId}
+	baseMessage := BaseMessage{Pkt:packet, Connection: conn}
 	byteMessage := ByteBufMessage{BaseMessage: &baseMessage}
 	msg := HandshakeMessage{ByteBufMessage: &byteMessage}
-	msg.baseMessageCodec = &msg
-	msg.byteBufMessageCodec = &msg
+	msg.BaseMessageCodec = &msg
+	msg.ByteBufMessageCodec = &msg
 	return &msg
 }
 
@@ -35,12 +35,12 @@ func NewHandshakeMessage0(conn api.Conn) *HandshakeMessage {
 	baseMessage := BaseMessage{Pkt:packet, Connection: conn}
 	byteMessage := ByteBufMessage{BaseMessage: &baseMessage}
 	msg := HandshakeMessage{ByteBufMessage: &byteMessage}
-	msg.baseMessageCodec = &msg
-	msg.byteBufMessageCodec = &msg
+	msg.BaseMessageCodec = &msg
+	msg.ByteBufMessageCodec = &msg
 	return &msg
 }
 
-func (message *HandshakeMessage) decodeByteBufMessage(reader io.Reader) {
+func (message *HandshakeMessage) DecodeByteBufMessage(reader io.Reader) {
 	message.DeviceId = DecodeString(reader)
 	message.OsName = DecodeString(reader)
 	message.OsVersion = DecodeString(reader)
@@ -52,7 +52,7 @@ func (message *HandshakeMessage) decodeByteBufMessage(reader io.Reader) {
 	message.Timestamp = DecodeInt64(reader)
 }
 
-func (message *HandshakeMessage) encodeByteBufMessage(writer io.Writer) {
+func (message *HandshakeMessage) EncodeByteBufMessage(writer io.Writer) {
 	EncodeString(writer, message.DeviceId)
 	EncodeString(writer, message.OsName)
 	EncodeString(writer, message.OsVersion)

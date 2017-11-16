@@ -15,14 +15,14 @@ type ErrorMessage struct {
 	Data   string
 }
 
-func (message *ErrorMessage) decodeByteBufMessage(reader io.Reader) {
+func (message *ErrorMessage) DecodeByteBufMessage(reader io.Reader) {
 	message.Cmd = DecodeByte(reader)
 	message.Code = DecodeByte(reader)
 	message.Reason = DecodeString(reader)
 	message.Data = DecodeString(reader)
 }
 
-func (message *ErrorMessage) encodeByteBufMessage(writer io.Writer) {
+func (message *ErrorMessage) EncodeByteBufMessage(writer io.Writer) {
 	EncodeByte(writer, message.Cmd)
 	EncodeByte(writer, message.Code)
 	EncodeString(writer, message.Reason)
@@ -40,6 +40,6 @@ func NewErrorMessage(msg api.Message) *ErrorMessage {
 	conn := msg.GetConnection()
 	result.Code = protocol.ERROR
 	result.Cmd = packet.Cmd
-	result.ByteBufMessage = ByteBufMessage{BaseMessage: &BaseMessage{Pkt: packet, Connection: conn}, byteBufMessageCodec: &result}
+	result.ByteBufMessage = ByteBufMessage{BaseMessage: &BaseMessage{Pkt: packet, Connection: conn}, ByteBufMessageCodec: &result}
 	return &result
 }

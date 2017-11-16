@@ -38,6 +38,7 @@ func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 	iv := msg.Iv;                                                     //AES密钥向量16位
 	clientKey := msg.ClientKey;                                       //客户端随机数16位
 	serverKey := security.CipherBoxIns.RandomAESKey();                //服务端随机数16位
+	log.Debug("clientKey=%s, serverKey=%s", clientKey, serverKey);
 	sessionKey := security.CipherBoxIns.MixKey(clientKey, serverKey); //会话密钥16位
 
 	//1.校验客户端消息字段

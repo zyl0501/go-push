@@ -18,8 +18,8 @@ func NewOKMessage(packet protocol.Packet, conn api.Conn) *OKMessage {
 	baseMessage := BaseMessage{Pkt:Pkt, Connection: conn}
 	byteMessage := ByteBufMessage{BaseMessage: &baseMessage}
 	msg := OKMessage{ByteBufMessage: &byteMessage}
-	msg.baseMessageCodec = &msg
-	msg.byteBufMessageCodec = &msg
+	msg.BaseMessageCodec = &msg
+	msg.ByteBufMessageCodec = &msg
 	return &msg
 }
 
@@ -28,17 +28,17 @@ func NewOKMessage0(conn api.Conn) *OKMessage {
 	baseMessage := BaseMessage{Pkt:packet, Connection: conn}
 	byteMessage := ByteBufMessage{BaseMessage: &baseMessage}
 	msg := OKMessage{ByteBufMessage: &byteMessage}
-	msg.baseMessageCodec = &msg
-	msg.byteBufMessageCodec = &msg
+	msg.BaseMessageCodec = &msg
+	msg.ByteBufMessageCodec = &msg
 	return &msg
 }
 
-func (message *OKMessage) decodeByteBufMessage(reader io.Reader) {
+func (message *OKMessage) DecodeByteBufMessage(reader io.Reader) {
 	message.Code = DecodeByte(reader)
 	message.Data = DecodeString(reader)
 }
 
-func (message *OKMessage) encodeByteBufMessage(writer io.Writer) {
+func (message *OKMessage) EncodeByteBufMessage(writer io.Writer) {
 	EncodeByte(writer, message.Code)
 	EncodeString(writer, message.Data)
 }

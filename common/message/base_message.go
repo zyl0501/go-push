@@ -9,7 +9,7 @@ import (
 )
 
 type BaseMessage struct {
-	baseMessageCodec
+	BaseMessageCodec
 	Pkt        protocol.Packet
 	Connection api.Conn
 }
@@ -87,7 +87,7 @@ func (msg *ByteBufMessage) encodeRaw() {
 	msg.Pkt.Body = tmp
 }
 
-type baseMessageCodec interface {
+type BaseMessageCodec interface {
 	decodeBaseMessage(body []byte)
 	encodeBaseMessage() ([]byte)
 }

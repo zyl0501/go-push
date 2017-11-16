@@ -11,6 +11,7 @@ import (
 	"github.com/zyl0501/go-push/core/handler"
 	"io"
 	"github.com/zyl0501/go-push/core/session"
+	"github.com/zyl0501/go-push/core/push"
 )
 
 type ConnectionServer struct {
@@ -18,13 +19,15 @@ type ConnectionServer struct {
 	SessionManager    *session.ReusableSessionManager
 	connManager       connection.ServerConnectionManager
 	messageDispatcher common.MessageDispatcher
+	pushCenter        *push.PushCenter
 }
 
-func NewConnectionServer(SessionManager    *session.ReusableSessionManager) (server ConnectionServer) {
+func NewConnectionServer(SessionManager *session.ReusableSessionManager, pushCenter *push.PushCenter) (server ConnectionServer) {
 	return ConnectionServer{
-		SessionManager:        SessionManager,
+		SessionManager:    SessionManager,
 		connManager:       connection.NewConnectionManager(),
 		messageDispatcher: common.NewMessageDispatcher(),
+		pushCenter:        pushCenter,
 	}
 }
 
@@ -50,7 +53,7 @@ func (server *ConnectionServer) Init() {
 	server.BaseServer.Init()
 	server.connManager.Init()
 	server.messageDispatcher.Register(protocol.HANDSHAKE, handler.NewHandshakeHandler(server.SessionManager, server.connManager))
-	server.messageDispatcher.Register(protocol.PUSH_UP, handler.NewPushUpHandler())
+	server.messageDispatcher.Register(protocol.PUSH_UP, handler.NewPushUpHandler(server.pushCenter))
 }
 
 func (server *ConnectionServer) listen() {

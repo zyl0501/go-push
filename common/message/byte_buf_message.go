@@ -10,24 +10,25 @@ import (
 
 type ByteBufMessage struct {
 	*BaseMessage
-	byteBufMessageCodec
+	ByteBufMessageCodec
 }
 
 func (msg *ByteBufMessage) decodeBaseMessage(body []byte) {
-	msg.decodeByteBufMessage(bytes.NewReader(body))
+	reader := bytes.NewReader(body)
+	msg.DecodeByteBufMessage(reader)
 }
 
 func (msg *ByteBufMessage) encodeBaseMessage() ([]byte) {
 	buf := bytes.NewBuffer(make([]byte, 0))
 	writer := bufio.NewWriter(buf)
-	msg.encodeByteBufMessage(writer)
+	msg.EncodeByteBufMessage(writer)
 	writer.Flush()
 	return buf.Bytes()
 }
 
-type byteBufMessageCodec interface {
-	decodeByteBufMessage(reader io.Reader)
-	encodeByteBufMessage(writer io.Writer)
+type ByteBufMessageCodec interface {
+	DecodeByteBufMessage(reader io.Reader)
+	EncodeByteBufMessage(writer io.Writer)
 }
 
 //***********************Encode/Decode method***********************
