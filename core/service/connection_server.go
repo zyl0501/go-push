@@ -92,7 +92,8 @@ func (server *ConnectionServer) handlerMessage(conn net.Conn) {
 				server.connManager.RemoveAndClose(serverConn.GetId())
 				break
 			} else {
-				continue
+				log.Error("%s read error: %v", conn.RemoteAddr().String(), err)
+				break
 			}
 		}
 		server.messageDispatcher.OnReceive(*packet, serverConn)

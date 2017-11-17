@@ -4,7 +4,6 @@ import (
 	"github.com/zyl0501/go-push/common/message"
 	log "github.com/alecthomas/log4go"
 	"github.com/zyl0501/go-push/api/router"
-	"fmt"
 )
 
 type PushCenter struct {
