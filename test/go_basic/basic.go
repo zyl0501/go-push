@@ -100,11 +100,13 @@ func enumTest() {
 }
 
 func chanTest() {
-	c := make(chan int)
+	c := make(chan int,2)
 	quit := make(chan int)
 	go func() {
 		for i := 0; i < 5; i++ {
-			fmt.Println(<-c)
+			d := <-c
+			fmt.Println(d)
+			time.Sleep(time.Second)
 		}
 		quit <- 0
 	}()
@@ -232,7 +234,7 @@ func f1(c, quit chan int) {
 		select {
 		case c <- x:
 			x += 1;
-			time.Sleep(time.Second)
+			//time.Sleep(time.Second)
 		case <-quit:
 			fmt.Println("quit")
 			return

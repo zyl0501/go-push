@@ -10,7 +10,7 @@ type PushUpMessage struct {
 	*ByteBufMessage
 
 	UserId string
-	ClientType int32
+	ClientType byte
 	Timeout int64
 	Content []byte
 	Tags []string
@@ -38,7 +38,7 @@ func NewPushUpMessage0(conn api.Conn) *PushUpMessage {
 
 func (message *PushUpMessage) DecodeByteBufMessage(reader io.Reader) {
 	message.UserId = DecodeString(reader)
-	message.ClientType = DecodeInt32(reader)
+	message.ClientType = DecodeByte(reader)
 	message.Timeout = DecodeInt64(reader)
 	message.Content = DecodeBytes(reader)
 	//message.Tags = DecodeBytes(reader)
@@ -46,7 +46,7 @@ func (message *PushUpMessage) DecodeByteBufMessage(reader io.Reader) {
 
 func (message *PushUpMessage) EncodeByteBufMessage(writer io.Writer) {
 	EncodeString(writer, message.UserId)
-	EncodeInt32(writer, message.ClientType)
+	EncodeByte(writer, message.ClientType)
 	EncodeInt64(writer, message.Timeout)
 	EncodeBytes(writer, message.Content)
 	//EncodeBytes(writer, message.Tags)
@@ -56,3 +56,4 @@ func (message *PushUpMessage) EncodeByteBufMessage(writer io.Writer) {
 func (msg *PushUpMessage) Send() {
 	msg.sendRaw()
 }
+

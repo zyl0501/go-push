@@ -47,3 +47,8 @@ type Cipher interface {
 	Decrypt(data []byte) ([]byte, error)
 	Encrypt(data []byte) ([]byte, error)
 }
+
+var (
+	CLIENT_TYPE_MOBILE byte = 1
+	CLIENT_TYPE_PC     byte = 2
+)

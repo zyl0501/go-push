@@ -80,6 +80,7 @@ func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 	ctx.OsVersion = msg.OsVersion
 	ctx.ClientVersion = msg.ClientVersion
 	ctx.Heartbeat = heartbeat
+	ctx.ClientType= api.CLIENT_TYPE_MOBILE
 	//ctx.ClientType =
 	//9.保存可复用session到Redis, 用于快速重连
 	handler.SessionManager.CacheSession(reusableSession)

@@ -9,22 +9,23 @@ import (
 	"github.com/zyl0501/go-push/common/message"
 	"github.com/zyl0501/go-push/common"
 	"github.com/zyl0501/go-push/sdk-server/push/handler"
+	"github.com/zyl0501/go-push/core/service"
 )
 
 type PushClient struct {
-	connClient *ConnectClient
+	connClient        *ConnectClient
 	messageDispatcher common.MessageDispatcher
 }
 
 func (client *PushClient) Init() {
-	client.messageDispatcher = common.MessageDispatcher{}
+	client.messageDispatcher = common.NewMessageDispatcher()
 	client.messageDispatcher.Register(protocol.OK, handler.PushUpOKHandler{})
 }
 
 func (client *PushClient) Start() {
 	if client.connClient == nil {
 		client.connClient = &ConnectClient{}
-		client.connClient.Connect("localhost", 9933)
+		client.connClient.Connect("localhost", 9934)
 	}
 	serverConn := client.connClient.conn
 	go client.listen(serverConn)
@@ -45,47 +46,19 @@ func (client *PushClient) Send(context push.PushContext) (push.PushResult) {
 	return push.PushResult{}
 }
 
-func (client *PushClient) listen(serverConn api.Conn){
+func (client *PushClient) listen(serverConn api.Conn) {
 	conn := serverConn.GetConn()
-	head := make([]byte, protocol.HeadLength)
-	headReadLen := 0
-loop:
+
 	for {
-		n, err := conn.Read(head[headReadLen:protocol.HeadLength])
+		packet, err := service.ReadPacket(conn)
 		if err != nil {
 			if err == io.EOF {
 				log.Error("%s connect error: %v", conn.RemoteAddr().String(), err)
-				break loop
-			}
-		} else {
-			if uint32(headReadLen)+uint32(n) < uint32(protocol.HeadLength) {
-				headReadLen += n
+				break
 			} else {
-				headReadLen = 0
-				packet, bodyLength := protocol.DecodePacket(head)
-				readLen := 0
-				body := make([]byte, bodyLength)
-			bodyLoop:
-				for {
-					n, err := conn.Read(body[readLen: bodyLength])
-					if err != nil {
-						if err == io.EOF {
-							log.Error("%s connect error: %v", conn.RemoteAddr().String(), err)
-							break loop
-						} else {
-							break bodyLoop
-						}
-					} else {
-						if uint32(readLen)+uint32(n) < bodyLength {
-							readLen += n
-						} else {
-							packet.Body = body
-							client.messageDispatcher.OnReceive(packet, serverConn)
-							break
-						}
-					}
-				}
+				continue
 			}
 		}
+		client.messageDispatcher.OnReceive(*packet, serverConn)
 	}
 }
