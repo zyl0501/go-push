@@ -30,4 +30,5 @@ func (handler *BindUserHandler) HandleMessage(m api.Message) {
 	msg := m.(*message.BindUserMessage)
 	log.Info("bind user")
 	handler.routerManager.Register(msg.UserId, router.LocalRouter{Conn: msg.Connection})
+	message.NewOKMessage(msg.Pkt, msg.Connection).Send()
 }

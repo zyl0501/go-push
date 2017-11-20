@@ -31,12 +31,24 @@ func (center *PushCenter) Start() {
 			//	pushMsg.Send()
 			//}
 
-			routers := center.routerManager.LookupAll(userId)
-			if len(routers) > 0 {
-				for _, localRouter := range routers {
-					pushMsg := message.NewPushDownMessage0(localRouter.Conn)
-					pushMsg.Content = msg.Content
-					pushMsg.Send()
+			//broadcast
+			if userId == "" {
+				routers := center.routerManager.Routers()
+				for _, userRouter := range routers {
+					for _, localRouter := range userRouter {
+						pushMsg := message.NewPushDownMessage0(localRouter.Conn)
+						pushMsg.Content = msg.Content
+						pushMsg.Send()
+					}
+				}
+			} else {
+				routers := center.routerManager.LookupAll(userId)
+				if len(routers) > 0 {
+					for _, localRouter := range routers {
+						pushMsg := message.NewPushDownMessage0(localRouter.Conn)
+						pushMsg.Content = msg.Content
+						pushMsg.Send()
+					}
 				}
 			}
 		}

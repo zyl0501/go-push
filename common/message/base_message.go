@@ -70,11 +70,6 @@ func (msg *BaseMessage) GetPacket() protocol.Packet {
 }
 
 func (msg *BaseMessage) Send() {
-	if msg.Connection == nil{
-		fmt.Println("BaseMessage conn is nil")
-	}else{
-		fmt.Println("BaseMessage conn is not nil")
-	}
 	msg.EncodeBody()
 	writer := bufio.NewWriter(msg.GetConnection().GetConn())
 	writer.Write(protocol.EncodePacket(msg.GetPacket()))

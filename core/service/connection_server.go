@@ -13,6 +13,9 @@ import (
 	"github.com/zyl0501/go-push/core/session"
 	"github.com/zyl0501/go-push/core/push"
 	"github.com/zyl0501/go-push/api/router"
+	"time"
+	"github.com/zyl0501/go-push/tools/config"
+	"github.com/zyl0501/go-push/api"
 )
 
 type ConnectionServer struct {
@@ -57,6 +60,7 @@ func (server *ConnectionServer) Init() {
 	server.connManager.Init()
 	server.messageDispatcher.Register(protocol.HANDSHAKE, handler.NewHandshakeHandler(server.SessionManager, server.connManager))
 	server.messageDispatcher.Register(protocol.BIND, handler.NewBindUserHandler(server.routerManager))
+	server.messageDispatcher.Register(protocol.HEARTBEAT, handler.HeartBeatHandler{})
 }
 
 func (server *ConnectionServer) listen() {
@@ -76,13 +80,28 @@ func (server *ConnectionServer) listen() {
 		}
 		log.Info("%s tcp connect success", conn.RemoteAddr().String())
 
-		go server.handlerMessage(conn)
+		serverConn := connection.NewPushConnection()
+		serverConn.Init(conn)
+		server.connManager.Add(serverConn)
+
+		go server.heartBeat(serverConn)
+		go server.handlerMessage(serverConn)
 	}
 }
-func (server *ConnectionServer) handlerMessage(conn net.Conn) {
-	serverConn := connection.NewPushConnection()
-	serverConn.Init(conn)
-	server.connManager.Add(serverConn)
+
+func (server *ConnectionServer) heartBeat(serverConn api.Conn) {
+	conn := serverConn.GetConn()
+	conn.SetDeadline(time.Now().Add(time.Duration(serverConn.GetSessionContext().Heartbeat)))
+	select {
+	case <-time.After(config.MaxHeartbeat):
+		if serverConn.IsReadTimeout() {
+			server.connManager.RemoveAndClose(serverConn.GetId())
+		}
+	}
+}
+
+func (server *ConnectionServer) handlerMessage(serverConn api.Conn) {
+	conn := serverConn.GetConn()
 
 	for {
 		packet, err := ReadPacket(conn)

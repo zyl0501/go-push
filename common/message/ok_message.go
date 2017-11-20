@@ -9,6 +9,7 @@ import (
 type OKMessage struct {
 	*ByteBufMessage
 
+	Cmd byte
 	Code byte
 	Data string
 }
@@ -18,27 +19,24 @@ func NewOKMessage(packet protocol.Packet, conn api.Conn) *OKMessage {
 	baseMessage := BaseMessage{Pkt:Pkt, Connection: conn}
 	byteMessage := ByteBufMessage{BaseMessage: &baseMessage}
 	msg := OKMessage{ByteBufMessage: &byteMessage}
-	msg.BaseMessageCodec = &msg
-	msg.ByteBufMessageCodec = &msg
-	return &msg
-}
-
-func NewOKMessage0(conn api.Conn) *OKMessage {
-	packet := protocol.Packet{Cmd:protocol.OK, SessionId:protocol.GetSessionId()}
-	baseMessage := BaseMessage{Pkt:packet, Connection: conn}
-	byteMessage := ByteBufMessage{BaseMessage: &baseMessage}
-	msg := OKMessage{ByteBufMessage: &byteMessage}
+	msg.Cmd = packet.Cmd
 	msg.BaseMessageCodec = &msg
 	msg.ByteBufMessageCodec = &msg
 	return &msg
 }
 
 func (message *OKMessage) DecodeByteBufMessage(reader io.Reader) {
+	message.Cmd = DecodeByte(reader)
 	message.Code = DecodeByte(reader)
 	message.Data = DecodeString(reader)
 }
 
 func (message *OKMessage) EncodeByteBufMessage(writer io.Writer) {
+	EncodeByte(writer, message.Cmd)
 	EncodeByte(writer, message.Code)
 	EncodeString(writer, message.Data)
 }
+
+//func (msg *OKMessage) Send() {
+//	msg.sendRaw()
+//}

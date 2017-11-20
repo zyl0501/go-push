@@ -52,9 +52,23 @@ func (manager *LocalRouterManager) Lookup(userId string, clientType byte) (*Loca
 	childMap, ok := manager.routers.Get(userId)
 	if ok && childMap != nil {
 		childMap0 := childMap.(map[byte]LocalRouter)
-		router :=childMap0[clientType]
+		router := childMap0[clientType]
 		return &router
 	} else {
 		return nil
 	}
+}
+
+func (manager *LocalRouterManager) Routers() (map[string](map[byte]LocalRouter)) {
+	routerLen := len(manager.routers.Items())
+	if routerLen <= 0 {
+		return nil
+	}
+	var resultMap map[string](map[byte]LocalRouter) = make(map[string](map[byte]LocalRouter), routerLen)
+	for key, value := range manager.routers.Items() {
+		if value != nil {
+			resultMap[key] = value.(map[byte]LocalRouter)
+		}
+	}
+	return resultMap
 }

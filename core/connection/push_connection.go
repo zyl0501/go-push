@@ -5,6 +5,8 @@ import (
 	"github.com/zyl0501/go-push/api"
 	"time"
 	"github.com/zyl0501/go-push/common/security"
+	"bufio"
+	"github.com/zyl0501/go-push/api/protocol"
 )
 
 var (
@@ -82,4 +84,10 @@ func (serverConn *PushConnection) GetSessionContext() *api.SessionContext {
 
 func (serverConn *PushConnection) SetSessionContext(context api.SessionContext) {
 	serverConn.context = context
+}
+
+func (conn *PushConnection) Send(packet protocol.Packet) {
+	writer := bufio.NewWriter(conn.conn)
+	writer.Write(protocol.EncodePacket(packet))
+	writer.Flush()
 }

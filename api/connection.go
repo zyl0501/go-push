@@ -1,6 +1,9 @@
 package api
 
-import "net"
+import (
+	"net"
+	"github.com/zyl0501/go-push/api/protocol"
+)
 
 const (
 	STATUS_NEW          byte = 0
@@ -20,6 +23,7 @@ type Conn interface {
 	GetConn() net.Conn
 	GetSessionContext() *SessionContext
 	SetSessionContext(context SessionContext)
+	Send(packet protocol.Packet)
 }
 
 type ConnectionManager interface {

@@ -24,7 +24,7 @@ func FakeBizProcess(pushClient *push.PushClient) {
 		pushMsg := push2.PushMsg{Content: "content_" + strconv.Itoa(index), MsgType: push2.MESSAGE, MsgId: "msgId_" + strconv.Itoa(index)}
 		context := push2.PushContext{}
 		context.Msg = pushMsg
-		context.UserId = "user-0"
+		//context.UserId = "user-0"
 		context.Broadcast = false
 		context.Timeout = 5000
 		context.ACK = push2.NO_ACK

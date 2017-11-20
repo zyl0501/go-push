@@ -43,7 +43,7 @@ func (i *inner) testMethod(){
 func main() {
 	//mapTest()
 	//enumTest()
-	chanTest()
+	//chanTest()
 	//bufReadWrite()
 	//jsonTest()
 	//appendTest()
@@ -66,6 +66,10 @@ func main() {
 	//	fmt.Println("go End")
 	//}()
 	//defer fmt.Println("Exit")
+
+	go timeTest(5)
+	go timeTest(2)
+	time.Sleep(20 * time.Second)
 }
 func mapTest() {
 	var pc map[string]string
@@ -637,4 +641,11 @@ func randomTest(){
 		fmt.Printf("rand.Int() error : %v \n", err)
 	}
 	fmt.Printf("rand.Int() : %v \n", rnd)
+}
+
+func timeTest(n int32){
+	select {
+	case <-time.After(time.Duration(n) * time.Second):
+		fmt.Println("after %v ...", n)
+	}
 }
