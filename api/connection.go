@@ -54,6 +54,8 @@ type Cipher interface {
 }
 
 var (
-	CLIENT_TYPE_MOBILE byte = 1
-	CLIENT_TYPE_PC     byte = 2
+	CLIENT_TYPE_MOBILE  byte = 1
+	CLIENT_TYPE_PC      byte = 2
+	CLIENT_TYPE_WEB     byte = 3
+	CLIENT_TYPE_UNKNOWN byte = 0
 )

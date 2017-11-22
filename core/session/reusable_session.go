@@ -38,7 +38,7 @@ func (manager *ReusableSessionManager) CacheSession(session *ReusableSession) {
 }
 
 func (manager *ReusableSessionManager) QuerySession(sessionId string) (*ReusableSession) {
-	session :=manager.cache[sessionId]
+	session := manager.cache[sessionId]
 	return &session
 }
 

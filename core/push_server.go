@@ -16,7 +16,7 @@ type MPushServer struct {
 }
 
 func NewPushServer() *MPushServer {
-	routerManager :=router.NewLocalRouterManager()
+	routerManager := router.NewLocalRouterManager()
 	pushServer := MPushServer{SessionManager: session.NewReusableSessionManager()}
 	pushCenter := push.NewPushCenter(routerManager)
 	pushServer.ConnectionServer = service.NewConnectionServer(pushServer.SessionManager, pushCenter, routerManager)

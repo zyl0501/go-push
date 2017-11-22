@@ -15,6 +15,8 @@ import (
 	"github.com/zyl0501/go-push/api/router"
 	"github.com/zyl0501/go-push/api"
 	"time"
+	"context"
+	"github.com/zyl0501/go-push/tools/config"
 )
 
 type ConnectionServer struct {
@@ -24,15 +26,22 @@ type ConnectionServer struct {
 	messageDispatcher common.MessageDispatcher
 	pushCenter        *push.PushCenter
 	routerManager     *router.LocalRouterManager
+
+	connCtx context.Context
+	cancel  func()
 }
 
-func NewConnectionServer(SessionManager *session.ReusableSessionManager, pushCenter *push.PushCenter, routerManager *router.LocalRouterManager) (server ConnectionServer) {
+func NewConnectionServer(SessionManager *session.ReusableSessionManager, pushCenter *push.PushCenter,
+	routerManager *router.LocalRouterManager) (server ConnectionServer) {
+	connCtx, cancel := context.WithCancel(context.Background())
 	return ConnectionServer{
 		SessionManager:    SessionManager,
 		connManager:       connection.NewConnectionManager(),
 		messageDispatcher: common.NewMessageDispatcher(),
 		pushCenter:        pushCenter,
 		routerManager:     routerManager,
+		connCtx:           connCtx,
+		cancel:            cancel,
 	}
 }
 
@@ -82,9 +91,6 @@ func (server *ConnectionServer) listen() {
 		serverConn := connection.NewPushConnection()
 		serverConn.Init(conn)
 		server.connManager.Add(serverConn)
-		deadTime := time.Now().Add(serverConn.GetSessionContext().Heartbeat)
-		log.Debug("dead time 4", deadTime)
-		conn.SetDeadline(deadTime)
 
 		go server.handlerMessage(serverConn)
 	}
@@ -92,8 +98,10 @@ func (server *ConnectionServer) listen() {
 
 func (server *ConnectionServer) handlerMessage(serverConn api.Conn) {
 	conn := serverConn.GetConn()
-
+	connCtx, cancel := context.WithCancel(context.Background())
 	for {
+		//开始检测心跳
+		go server.heartbeatCheck(connCtx, serverConn, 0)
 		packet, err := ReadPacket(conn)
 		if err != nil {
 			if err == io.EOF {
@@ -110,5 +118,34 @@ func (server *ConnectionServer) handlerMessage(serverConn api.Conn) {
 			break
 		}
 		server.messageDispatcher.OnReceive(*packet, serverConn)
+	}
+	cancel()
+}
+
+func (server *ConnectionServer) heartbeatCheck(ctx context.Context, conn api.Conn, timeoutTimes int) {
+	select {
+	case t:= <-time.After(conn.GetSessionContext().Heartbeat):
+		log.Info("time: ", t)
+		if conn == nil || !conn.IsConnected() {
+			log.Info("heartbeat timeout times=%d, connection disconnected, conn=%v", timeoutTimes, conn);
+			return;
+		}
+		if conn.IsReadTimeout() {
+			timeoutTimes += 1
+			if timeoutTimes > config.MaxHeartbeatTimeoutTimes {
+				server.connManager.RemoveAndClose(conn.GetId())
+				log.Info("client heartbeat timeout times=%d, do close conn=%v", timeoutTimes, conn);
+				return;
+			} else {
+				log.Info("client heartbeat timeout times=%d, connection=%v", timeoutTimes, conn);
+			}
+		} else {
+			timeoutTimes = 0;
+		}
+		go server.heartbeatCheck(ctx, conn, timeoutTimes)
+		return
+	case <-ctx.Done():
+		log.Info("heartbeat check cancel because of context done.")
+		return
 	}
 }

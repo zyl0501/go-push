@@ -3,11 +3,12 @@ package config
 import "time"
 
 var (
-	MinHeartbeat      = 5 * time.Second
-	MaxHeartbeat      = 10 * time.Second
-	AesKeyLength      = 16
-	SessionExpireTime = 10 * time.Second
-	PublicKey         = `
+	MinHeartbeat             = 5 * time.Second
+	MaxHeartbeat             = 5 * time.Second
+	AesKeyLength             = 16
+	SessionExpireTime        = 10 * time.Second
+	MaxHeartbeatTimeoutTimes = 3 //心跳检测，超时重试次数
+	PublicKey                = `
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZsfv1qscqYdy4vY+P4e3cAtmv
 ppXQcRvrF1cB4drkv0haU24Y7m5qYtT52Kr539RdbKKdLAM6s20lWy7+5C0Dgacd

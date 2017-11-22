@@ -8,6 +8,8 @@ import (
 	"bufio"
 	"github.com/zyl0501/go-push/api/protocol"
 	"github.com/zyl0501/go-push/tools/config"
+	"fmt"
+	"github.com/zyl0501/go-push/tools/utils"
 )
 
 var (
@@ -21,6 +23,11 @@ type PushConnection struct {
 	lastWriteTime time.Time
 	id            string
 	context       api.SessionContext
+}
+
+func (conn *PushConnection) String() string {
+	return fmt.Sprintf("PushConnection{conn=%v,status=%d,lastReadTime=%v,lastWriteTime=%v,id=%s,context=%v}",
+		conn.conn, conn.status, conn.lastReadTime.Format(utils.FullTimeFormat), conn.lastWriteTime.Format(utils.FullTimeFormat), conn.id, conn.context)
 }
 
 func NewPushConnection() (conn *PushConnection) {
