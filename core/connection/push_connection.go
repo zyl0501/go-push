@@ -7,6 +7,7 @@ import (
 	"github.com/zyl0501/go-push/common/security"
 	"bufio"
 	"github.com/zyl0501/go-push/api/protocol"
+	"github.com/zyl0501/go-push/tools/config"
 )
 
 var (
@@ -41,6 +42,7 @@ func (serverConn *PushConnection) Init(conn net.Conn) {
 	serverConn.context = api.SessionContext{}
 	cipher, _ := security.NewRsaCipher()
 	serverConn.context.Cipher0 = cipher
+	serverConn.context.Heartbeat = config.MaxHeartbeat
 }
 
 func (serverConn *PushConnection) GetId() string {
@@ -52,11 +54,11 @@ func (serverConn *PushConnection) IsConnected() bool {
 }
 
 func (serverConn *PushConnection) IsReadTimeout() bool {
-	return int32(time.Since(serverConn.lastReadTime)) > serverConn.context.Heartbeat
+	return time.Since(serverConn.lastReadTime) > serverConn.context.Heartbeat
 }
 
 func (serverConn *PushConnection) IsWriteTimeout() bool {
-	return int32(time.Since(serverConn.lastReadTime)) > serverConn.context.Heartbeat
+	return time.Since(serverConn.lastWriteTime) > serverConn.context.Heartbeat
 }
 
 func (serverConn *PushConnection) UpdateLastReadTime() {

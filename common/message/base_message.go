@@ -6,7 +6,6 @@ import (
 	"github.com/zyl0501/go-push/api/protocol"
 	log "github.com/alecthomas/log4go"
 	"errors"
-	"fmt"
 )
 
 type BaseMessage struct {

@@ -13,9 +13,8 @@ import (
 	"github.com/zyl0501/go-push/core/session"
 	"github.com/zyl0501/go-push/core/push"
 	"github.com/zyl0501/go-push/api/router"
-	"time"
-	"github.com/zyl0501/go-push/tools/config"
 	"github.com/zyl0501/go-push/api"
+	"time"
 )
 
 type ConnectionServer struct {
@@ -60,7 +59,7 @@ func (server *ConnectionServer) Init() {
 	server.connManager.Init()
 	server.messageDispatcher.Register(protocol.HANDSHAKE, handler.NewHandshakeHandler(server.SessionManager, server.connManager))
 	server.messageDispatcher.Register(protocol.BIND, handler.NewBindUserHandler(server.routerManager))
-	server.messageDispatcher.Register(protocol.HEARTBEAT, handler.HeartBeatHandler{})
+	server.messageDispatcher.Register(protocol.HEARTBEAT, &handler.HeartBeatHandler{})
 }
 
 func (server *ConnectionServer) listen() {
@@ -83,20 +82,11 @@ func (server *ConnectionServer) listen() {
 		serverConn := connection.NewPushConnection()
 		serverConn.Init(conn)
 		server.connManager.Add(serverConn)
+		deadTime := time.Now().Add(serverConn.GetSessionContext().Heartbeat)
+		log.Debug("dead time 4", deadTime)
+		conn.SetDeadline(deadTime)
 
-		go server.heartBeat(serverConn)
 		go server.handlerMessage(serverConn)
-	}
-}
-
-func (server *ConnectionServer) heartBeat(serverConn api.Conn) {
-	conn := serverConn.GetConn()
-	conn.SetDeadline(time.Now().Add(time.Duration(serverConn.GetSessionContext().Heartbeat)))
-	select {
-	case <-time.After(config.MaxHeartbeat):
-		if serverConn.IsReadTimeout() {
-			server.connManager.RemoveAndClose(serverConn.GetId())
-		}
 	}
 }
 
@@ -108,12 +98,16 @@ func (server *ConnectionServer) handlerMessage(serverConn api.Conn) {
 		if err != nil {
 			if err == io.EOF {
 				log.Error("%s connect error: %v", conn.RemoteAddr().String(), err)
-				server.connManager.RemoveAndClose(serverConn.GetId())
-				break
 			} else {
 				log.Error("%s read error: %v", conn.RemoteAddr().String(), err)
-				break
 			}
+			ctx := serverConn.GetSessionContext()
+			server.connManager.RemoveAndClose(serverConn.GetId())
+			if ctx.UserId != "" {
+				routerManager := server.routerManager
+				routerManager.UnRegister(ctx.UserId, ctx.ClientType)
+			}
+			break
 		}
 		server.messageDispatcher.OnReceive(*packet, serverConn)
 	}

@@ -72,6 +72,7 @@ func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 	okMsg.SessionId = reusableSession.SessionId
 	okMsg.ExpireTime = reusableSession.ExpireTime
 	okMsg.Send()
+	log.Debug("ok message send")
 	//7.更换会话密钥AES(clientKey)=>AES(sessionKey)
 	ctx.Cipher0 = &security.AesCipher{Key: sessionKey, Iv: iv}
 	//8.保存client信息到当前连接

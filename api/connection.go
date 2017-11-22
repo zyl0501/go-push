@@ -3,6 +3,7 @@ package api
 import (
 	"net"
 	"github.com/zyl0501/go-push/api/protocol"
+	"time"
 )
 
 const (
@@ -42,7 +43,7 @@ type SessionContext struct {
 	ClientVersion string
 	UserId        string
 	Tags          string
-	Heartbeat     int32
+	Heartbeat     time.Duration
 	ClientType    byte
 	Cipher0       Cipher
 }

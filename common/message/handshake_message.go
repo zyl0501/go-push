@@ -4,6 +4,8 @@ import (
 	"github.com/zyl0501/go-push/api/protocol"
 	"github.com/zyl0501/go-push/api"
 	"io"
+	"time"
+	"github.com/zyl0501/go-push/tools/utils"
 )
 
 type HandshakeMessage struct {
@@ -15,8 +17,8 @@ type HandshakeMessage struct {
 	ClientVersion string
 	Iv            []byte
 	ClientKey     []byte
-	MinHeartbeat  int32
-	MaxHeartbeat  int32
+	MinHeartbeat  time.Duration
+	MaxHeartbeat  time.Duration
 	Timestamp     int64
 }
 
@@ -47,8 +49,8 @@ func (message *HandshakeMessage) DecodeByteBufMessage(reader io.Reader) {
 	message.ClientVersion = DecodeString(reader)
 	message.Iv = DecodeBytes(reader)
 	message.ClientKey = DecodeBytes(reader)
-	message.MinHeartbeat = DecodeInt32(reader)
-	message.MaxHeartbeat = DecodeInt32(reader)
+	message.MinHeartbeat =  utils.MillisecondToDuration(DecodeInt64(reader))
+	message.MaxHeartbeat =  utils.MillisecondToDuration(DecodeInt64(reader))
 	message.Timestamp = DecodeInt64(reader)
 }
 
@@ -59,7 +61,7 @@ func (message *HandshakeMessage) EncodeByteBufMessage(writer io.Writer) {
 	EncodeString(writer, message.ClientVersion)
 	EncodeBytes(writer, message.Iv)
 	EncodeBytes(writer, message.ClientKey)
-	EncodeInt32(writer, message.MinHeartbeat)
-	EncodeInt32(writer, message.MaxHeartbeat)
+	EncodeInt64(writer, utils.DurationToMillisecond(message.MinHeartbeat))
+	EncodeInt64(writer, utils.DurationToMillisecond(message.MaxHeartbeat))
 	EncodeInt64(writer, message.Timestamp)
 }
