@@ -11,7 +11,7 @@ import (
 	"encoding/binary"
 	"crypto/rand"
 	"math/big"
-	"github.com/zyl0501/go-push/test/go_basic/times"
+	"github.com/zyl0501/go-push/test/go_basic/fun"
 )
 
 const (
@@ -72,7 +72,8 @@ func main() {
 	//go timeTest(2)
 	//time.Sleep(20 * time.Second)
 
-	times.TimeTest()
+	//times.TimeTest()
+	fun.FunPtrTest()
 }
 
 func mapTest() {
