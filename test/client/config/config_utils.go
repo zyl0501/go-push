@@ -6,6 +6,6 @@ import (
 	"time"
 )
 
-func GetHeartbeat(minHeartbeat time.Duration, maxHeartbeat time.Duration) time.Duration {
-	return time.Duration(utils.MaxInt64(int64(config.MinHeartbeat), utils.MinInt64(int64(maxHeartbeat), int64(config.MaxHeartbeat))))
+func GetHeartbeat(expireHeartbeat time.Duration) time.Duration {
+	return time.Duration(utils.MaxInt64(int64(config.MinHeartbeat), utils.MinInt64(int64(expireHeartbeat), int64(config.MaxHeartbeat))))
 }

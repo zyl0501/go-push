@@ -11,7 +11,6 @@ import (
 	"github.com/zyl0501/go-push/core/handler"
 	"io"
 	"github.com/zyl0501/go-push/core/session"
-	"github.com/zyl0501/go-push/core/push"
 	"github.com/zyl0501/go-push/api/router"
 	"github.com/zyl0501/go-push/api"
 	"time"
@@ -20,47 +19,41 @@ import (
 )
 
 type ConnectionServer struct {
-	service.BaseServer
+	*service.BaseServer
 	SessionManager    *session.ReusableSessionManager
 	connManager       connection.ServerConnectionManager
 	messageDispatcher common.MessageDispatcher
-	pushCenter        *push.PushCenter
 	routerManager     *router.LocalRouterManager
 
 	connCtx context.Context
 	cancel  func()
 }
 
-func NewConnectionServer(SessionManager *session.ReusableSessionManager, pushCenter *push.PushCenter,
-	routerManager *router.LocalRouterManager) (server ConnectionServer) {
+func NewConnectionServer(SessionManager *session.ReusableSessionManager, routerManager *router.LocalRouterManager) (server ConnectionServer) {
 	connCtx, cancel := context.WithCancel(context.Background())
-	return ConnectionServer{
+	server = ConnectionServer{
 		SessionManager:    SessionManager,
 		connManager:       connection.NewConnectionManager(),
 		messageDispatcher: common.NewMessageDispatcher(),
-		pushCenter:        pushCenter,
 		routerManager:     routerManager,
 		connCtx:           connCtx,
 		cancel:            cancel,
 	}
+	server.BaseServer = &service.BaseServer{BootFunc: &server}
+	return server
 }
 
-func (server *ConnectionServer) Start(listener service.Listener) {
-	server.BaseServer.Start(listener)
-	server.listen()
+func (server *ConnectionServer) StartFunc(ch chan service.Result) {
+	if ch != nil {
+		ch <- service.Result{Success: true}
+	}
 }
 
-func (server *ConnectionServer) Stop(listener service.Listener) {
-	server.BaseServer.Stop(listener)
+func (server *ConnectionServer) StopFunc(ch chan service.Result) {
 	server.connManager.Destroy()
-}
-
-func (server *ConnectionServer) SyncStart() (success bool) {
-	return false
-}
-
-func (server *ConnectionServer) SyncStop() (success bool) {
-	return false
+	if ch != nil {
+		ch <- service.Result{Success: true}
+	}
 }
 
 func (server *ConnectionServer) Init() {
@@ -69,6 +62,7 @@ func (server *ConnectionServer) Init() {
 	server.messageDispatcher.Register(protocol.HANDSHAKE, handler.NewHandshakeHandler(server.SessionManager, server.connManager))
 	server.messageDispatcher.Register(protocol.BIND, handler.NewBindUserHandler(server.routerManager))
 	server.messageDispatcher.Register(protocol.HEARTBEAT, &handler.HeartBeatHandler{})
+	server.messageDispatcher.Register(protocol.FAST_CONNECT, handler.NewFastConnectHandler(server.SessionManager))
 }
 
 func (server *ConnectionServer) listen() {
