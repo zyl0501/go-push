@@ -92,16 +92,16 @@ func (server *ConnectionServer) listen() {
 		serverConn.Init(conn)
 		server.connManager.Add(serverConn)
 
-		go server.handlerMessage(serverConn)
+		connCtx, cancel := context.WithCancel(context.Background())
+		go server.handlerMessage(connCtx, cancel, serverConn)
+		//开始检测心跳
+		go server.heartbeatCheck(connCtx, cancel, serverConn)
 	}
 }
 
-func (server *ConnectionServer) handlerMessage(serverConn api.Conn) {
+func (server *ConnectionServer) handlerMessage(ctx context.Context, cancel context.CancelFunc, serverConn api.Conn) {
 	conn := serverConn.GetConn()
-	connCtx, cancel := context.WithCancel(context.Background())
 	for {
-		//开始检测心跳
-		go server.heartbeatCheck(connCtx, serverConn, 0)
 		packet, err := ReadPacket(conn)
 		if err != nil {
 			if err == io.EOF {
@@ -109,43 +109,47 @@ func (server *ConnectionServer) handlerMessage(serverConn api.Conn) {
 			} else {
 				log.Error("%s read error: %v", conn.RemoteAddr().String(), err)
 			}
-			ctx := serverConn.GetSessionContext()
-			server.connManager.RemoveAndClose(serverConn.GetId())
-			if ctx.UserId != "" {
-				routerManager := server.routerManager
-				routerManager.UnRegister(ctx.UserId, ctx.ClientType)
-			}
 			break
 		}
+		serverConn.UpdateLastReadTime()
 		server.messageDispatcher.OnReceive(*packet, serverConn)
 	}
 	cancel()
 }
 
-func (server *ConnectionServer) heartbeatCheck(ctx context.Context, conn api.Conn, timeoutTimes int) {
-	select {
-	case t:= <-time.After(conn.GetSessionContext().Heartbeat):
-		log.Info("time: ", t)
-		if conn == nil || !conn.IsConnected() {
-			log.Info("heartbeat timeout times=%d, connection disconnected, conn=%v", timeoutTimes, conn);
-			return;
-		}
-		if conn.IsReadTimeout() {
-			timeoutTimes += 1
-			if timeoutTimes > config.MaxHeartbeatTimeoutTimes {
-				server.connManager.RemoveAndClose(conn.GetId())
-				log.Info("client heartbeat timeout times=%d, do close conn=%v", timeoutTimes, conn);
+func (server *ConnectionServer) heartbeatCheck(ctx context.Context, cancel context.CancelFunc, conn api.Conn) {
+	log.Info("Heartbeat: %v", conn.GetSessionContext().Heartbeat)
+	timeoutTimes := 0
+	for {
+		select {
+		case <-time.After(conn.GetSessionContext().Heartbeat):
+			if conn == nil || !conn.IsConnected() {
+				log.Info("heartbeat timeout times=%d, connection disconnected, conn=%v", timeoutTimes, conn);
 				return;
-			} else {
-				log.Info("client heartbeat timeout times=%d, connection=%v", timeoutTimes, conn);
 			}
-		} else {
-			timeoutTimes = 0;
+			if conn.IsReadTimeout() {
+				timeoutTimes += 1
+				if timeoutTimes > config.MaxHeartbeatTimeoutTimes {
+					cancel()
+					log.Info("client heartbeat timeout times=%d, do close conn=%v", timeoutTimes, conn);
+					continue;
+				} else {
+					log.Info("client heartbeat timeout times=%d, connection=%v", timeoutTimes, conn);
+				}
+			} else {
+				timeoutTimes = 0;
+				log.Info("client heartbeat health")
+			}
+			continue
+		case <-ctx.Done():
+			ctx := conn.GetSessionContext()
+			server.connManager.RemoveAndClose(conn.GetId())
+			if ctx.UserId != "" {
+				routerManager := server.routerManager
+				routerManager.UnRegister(ctx.UserId, ctx.ClientType)
+			}
+			log.Info("heartbeat check cancel because of context done.")
+			return
 		}
-		go server.heartbeatCheck(ctx, conn, timeoutTimes)
-		return
-	case <-ctx.Done():
-		log.Info("heartbeat check cancel because of context done.")
-		return
 	}
 }
