@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-var sessionExpireTime = config.SessionExpireTime
+var sessionExpireTime = config.CC.Core.SessionExpireTime
 
 type ReusableSession struct {
 	SessionId  string

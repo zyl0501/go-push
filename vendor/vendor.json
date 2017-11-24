@@ -3,12 +3,35 @@
 	"ignore": "test",
 	"package": [
 		{
+			"path": "git",
+			"revision": "github.com:jinzhu/configor.git",
+			"version": "github.com:jinzhu/configor.git"
+		},
+		{
+			"checksumSHA1": "rcoUTEGR7KVr963l6P1rlMaYCzA=",
+			"path": "github.com/BurntSushi/toml",
+			"revision": "a368813c5e648fee92e5f6c30e3944ff9d5e8895",
+			"revisionTime": "2017-06-26T11:06:00Z"
+		},
+		{
 			"checksumSHA1": "RK6kz3Q9OS6uHkkLVEprb1lUOMI=",
 			"path": "github.com/alecthomas/log4go",
 			"revision": "a9cdec6a8ef5b02d7e1b8dd0782d34c62648f07d",
 			"revisionTime": "2017-09-20T10:20:43Z",
 			"version": "=master",
 			"versionExact": "master"
+		},
+		{
+			"checksumSHA1": "WrqzuklyjTryYdwNTq0mFdKsUHc=",
+			"path": "github.com/go-akka/configuration",
+			"revision": "755180b9a146a94d76051113e9624bdc8327c499",
+			"revisionTime": "2017-03-09T06:32:47Z"
+		},
+		{
+			"checksumSHA1": "W1uSh3B1ukJUmzSr6Bi53kz0Ejk=",
+			"path": "github.com/go-akka/configuration/hocon",
+			"revision": "755180b9a146a94d76051113e9624bdc8327c499",
+			"revisionTime": "2017-03-09T06:32:47Z"
 		},
 		{
 			"path": "github.com/golang/glog",
@@ -19,6 +42,12 @@
 			"path": "github.com/google/logger",
 			"revision": "8fe7758b4c5f42c3df32b77c5c2bc3ccd65ea257",
 			"revisionTime": "2017-10-24T20:06:56Z"
+		},
+		{
+			"checksumSHA1": "rkea+Z/ak4iBye6SrupXdYfNUMc=",
+			"path": "github.com/jinzhu/configor",
+			"revision": "6ecfe629230f24c2e92c7894c6ab21b83b757a39",
+			"revisionTime": "2017-10-24T08:10:03Z"
 		},
 		{
 			"checksumSHA1": "P1IAhpaqFMX/Z6GLa9QLisoSIf0=",
@@ -33,6 +62,12 @@
 		{
 			"path": "golang.org/x/sys/windows/svc/eventlog",
 			"revision": ""
+		},
+		{
+			"checksumSHA1": "ru3kzyBD3810H35DVvviSPPrBaM=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": "287cf08546ab5e7e37d55a84f7ed3fd1db036de5",
+			"revisionTime": "2017-11-16T09:02:43Z"
 		}
 	],
 	"rootPath": "github.com/zyl0501/go-push"

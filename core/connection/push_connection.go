@@ -49,7 +49,7 @@ func (serverConn *PushConnection) Init(conn net.Conn) {
 	serverConn.context = &api.SessionContext{}
 	cipher, _ := security.NewRsaCipher()
 	serverConn.context.Cipher0 = cipher
-	serverConn.context.Heartbeat = config.MaxHeartbeat
+	serverConn.context.Heartbeat = config.CC.Core.MaxHeartbeat
 }
 
 func (serverConn *PushConnection) GetId() string {

@@ -16,6 +16,7 @@ import (
 	"time"
 	"context"
 	"github.com/zyl0501/go-push/tools/config"
+	"strconv"
 )
 
 type ConnectionServer struct {
@@ -67,7 +68,8 @@ func (server *ConnectionServer) Init() {
 }
 
 func (server *ConnectionServer) listen() {
-	netListen, err := net.Listen("tcp", "localhost:9933")
+	netListen, err := net.Listen("tcp",
+		config.CC.Net.ConnectServerBindIp+strconv.Itoa(config.CC.Net.ConnectServerBindPort))
 	if err != nil {
 		log.Error(os.Stderr, "Fatal error: %s", err.Error())
 		os.Exit(1)
@@ -124,7 +126,7 @@ func (server *ConnectionServer) heartbeatCheck(ctx context.Context, cancel conte
 			}
 			if conn.IsReadTimeout() {
 				timeoutTimes += 1
-				if timeoutTimes > config.MaxHeartbeatTimeoutTimes {
+				if timeoutTimes > config.CC.Core.MaxHeartbeatTimeoutTimes {
 					cancel()
 					log.Info("client heartbeat timeout times=%d, do close conn=%v", timeoutTimes, conn);
 					continue;
