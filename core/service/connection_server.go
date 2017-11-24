@@ -39,7 +39,7 @@ func NewConnectionServer(SessionManager *session.ReusableSessionManager, routerM
 		connCtx:           connCtx,
 		cancel:            cancel,
 	}
-	server.BaseServer = &service.BaseServer{BootFunc: &server}
+	server.BaseServer = service.NewBaseServer(&server)
 	return server
 }
 
@@ -47,6 +47,7 @@ func (server *ConnectionServer) StartFunc(ch chan service.Result) {
 	if ch != nil {
 		ch <- service.Result{Success: true}
 	}
+	server.listen()
 }
 
 func (server *ConnectionServer) StopFunc(ch chan service.Result) {

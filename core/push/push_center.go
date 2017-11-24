@@ -5,7 +5,6 @@ import (
 	log "github.com/alecthomas/log4go"
 	"github.com/zyl0501/go-push/api/router"
 	"github.com/zyl0501/go-push/api"
-	"context"
 	"github.com/zyl0501/go-push/api/service"
 )
 
@@ -17,6 +16,7 @@ type PushCenter struct {
 
 func NewPushCenter(routerManager *router.LocalRouterManager) *PushCenter {
 	pushCenter := PushCenter{msgQueue: make(chan message.PushUpMessage), routerManager: routerManager}
+	pushCenter.BaseServer = service.NewBaseServer(&pushCenter)
 	return &pushCenter
 }
 

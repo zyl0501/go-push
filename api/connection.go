@@ -23,7 +23,7 @@ type Conn interface {
 	Close() error
 	GetConn() net.Conn
 	GetSessionContext() *SessionContext
-	SetSessionContext(context SessionContext)
+	SetSessionContext(context *SessionContext)
 	Send(packet protocol.Packet)
 }
 

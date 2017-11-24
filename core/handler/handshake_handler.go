@@ -62,7 +62,7 @@ func (handler *HandshakeHandler) HandleMessage(m api.Message) {
 	//3.更换会话密钥RSA=>AES(clientKey)
 	ctx.Cipher0 = &security.AesCipher{clientKey, iv}
 	//4.生成可复用session, 用于快速重连
-	reusableSession := session.NewSession(*ctx)
+	reusableSession := session.NewSession(ctx)
 	//5.计算心跳时间
 	heartbeat := config.GetHeartbeat(msg.MaxHeartbeat);
 	//6.响应握手成功消息

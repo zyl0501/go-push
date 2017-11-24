@@ -22,7 +22,7 @@ type GatewayServer struct {
 
 func NewGatewayServer(pushCenter *push.PushCenter) *GatewayServer {
 	server := GatewayServer{}
-	server.BaseServer = &service.BaseServer{BootFunc:  &server}
+	server.BaseServer = service.NewBaseServer(&server)
 	server.connManager = connection.NewConnectionManager()
 	server.messageDispatcher = common.NewMessageDispatcher()
 	server.pushCenter = pushCenter

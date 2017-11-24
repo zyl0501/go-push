@@ -51,6 +51,6 @@ func (handler *FastConnectHandler) HandleMessage(m api.Message) {
 		fastOkMsg := message.NewFastConnectOKMessage(msg.GetPacket().SessionId, msg.GetConnection())
 		fastOkMsg.Heartbeat = heartbeat
 		fastOkMsg.Send()
-		log.Info("ast connect success, session=%v", session.Context)
+		log.Info("fast connect success, session=%v", session.Context)
 	}
 }

@@ -22,7 +22,7 @@ type PushConnection struct {
 	lastReadTime  time.Time
 	lastWriteTime time.Time
 	id            string
-	context       api.SessionContext
+	context       *api.SessionContext
 }
 
 func (conn *PushConnection) String() string {
@@ -46,7 +46,7 @@ func (serverConn *PushConnection) Init(conn net.Conn) {
 	serverConn.status = api.STATUS_CONNECTED
 	serverConn.lastReadTime = time.Now()
 	serverConn.lastWriteTime = time.Now()
-	serverConn.context = api.SessionContext{}
+	serverConn.context = &api.SessionContext{}
 	cipher, _ := security.NewRsaCipher()
 	serverConn.context.Cipher0 = cipher
 	serverConn.context.Heartbeat = config.MaxHeartbeat
@@ -88,10 +88,10 @@ func (serverConn *PushConnection) GetConn() net.Conn {
 }
 
 func (serverConn *PushConnection) GetSessionContext() *api.SessionContext {
-	return &serverConn.context
+	return serverConn.context
 }
 
-func (serverConn *PushConnection) SetSessionContext(context api.SessionContext) {
+func (serverConn *PushConnection) SetSessionContext(context *api.SessionContext) {
 	serverConn.context = context
 }
 
