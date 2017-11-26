@@ -27,6 +27,10 @@
 			"revisionTime": "2017-10-24T15:42:51Z"
 		},
 		{
+			"path": "golang.org/x",
+			"revision": ""
+		},
+		{
 			"path": "golang.org/x/sys/windows",
 			"revision": ""
 		},

@@ -11,6 +11,7 @@ import (
 	"encoding/binary"
 	"crypto/rand"
 	"math/big"
+	"github.com/zyl0501/go-push/test/go_basic/ctx"
 )
 
 const (
@@ -67,9 +68,11 @@ func main() {
 	//}()
 	//defer fmt.Println("Exit")
 
-	go timeTest(5)
-	go timeTest(2)
-	time.Sleep(20 * time.Second)
+	//go timeTest(5)
+	//go timeTest(2)
+	//time.Sleep(20 * time.Second)
+
+	ctx.ContextTest3()
 }
 func mapTest() {
 	var pc map[string]string
