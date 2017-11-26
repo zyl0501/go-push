@@ -8,15 +8,15 @@ import (
 	"strconv"
 )
 
-var sessionExpireTime = config.SessionExpireTime
+var sessionExpireTime = config.CC.Core.SessionExpireTime
 
 type ReusableSession struct {
 	SessionId  string
 	ExpireTime int64
-	Context    api.SessionContext
+	Context    *api.SessionContext
 }
 
-func NewSession(context api.SessionContext) *ReusableSession {
+func NewSession(context *api.SessionContext) *ReusableSession {
 	now := time.Now()
 	session := ReusableSession{}
 	session.Context = context;
@@ -38,7 +38,7 @@ func (manager *ReusableSessionManager) CacheSession(session *ReusableSession) {
 }
 
 func (manager *ReusableSessionManager) QuerySession(sessionId string) (*ReusableSession) {
-	session := manager.cache[sessionId]
+	session := manager.cache[getSessionKey(sessionId)]
 	return &session
 }
 

@@ -14,7 +14,7 @@ import (
 )
 
 type GatewayServer struct {
-	service.BaseServer
+	*service.BaseServer
 	connManager       connection.ServerConnectionManager
 	messageDispatcher common.MessageDispatcher
 	pushCenter        *push.PushCenter
@@ -22,7 +22,7 @@ type GatewayServer struct {
 
 func NewGatewayServer(pushCenter *push.PushCenter) *GatewayServer {
 	server := GatewayServer{}
-	server.BaseServer = service.BaseServer{}
+	server.BaseServer = service.NewBaseServer(&server)
 	server.connManager = connection.NewConnectionManager()
 	server.messageDispatcher = common.NewMessageDispatcher()
 	server.pushCenter = pushCenter
@@ -35,9 +35,18 @@ func (server *GatewayServer) Init() {
 	server.messageDispatcher.Register(protocol.PUSH_UP, handler.NewPushUpHandler(server.pushCenter))
 }
 
-func (server *GatewayServer) Start(listener service.Listener) {
-	server.BaseServer.Start(listener)
+func (server *GatewayServer) StartFunc(ch chan service.Result) () {
+	if ch !=nil {
+		ch <- service.Result{Success: true}
+	}
 	server.listen()
+}
+
+func (server *GatewayServer) StopFunc(ch chan service.Result) () {
+	server.connManager.Destroy()
+	if ch !=nil {
+		ch <- service.Result{Success: true}
+	}
 }
 
 func (server *GatewayServer) listen() {

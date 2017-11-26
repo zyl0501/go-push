@@ -1,17 +1,14 @@
 package service
 
 type Server interface {
-	Start(listener Listener)
-	Stop(listener Listener)
-	//CompletableFuture<Boolean> Start();
-	//CompletableFuture<Boolean> Stop();
-	SyncStart()(bool)
-	SyncStop()(bool)
+	Start(chan Result)
+	Stop(chan Result)
 	Init()
-	IsRunning()(bool)
+	IsRunning() (bool)
 }
 
-type Listener interface {
-	OnSuccess(args ...interface{})
-	OnFailure(err error)
+type Result struct {
+	Success bool
+	Err     error
+	Args    []interface{}
 }

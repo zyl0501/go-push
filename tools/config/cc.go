@@ -1,13 +1,65 @@
 package config
 
-import "time"
+import (
+	"time"
+	"github.com/go-akka/configuration"
+	"fmt"
+	"os"
+	"log"
+)
+
+var CC = load()
+
+type ccObj struct {
+	Core struct {
+		MinHeartbeat             time.Duration
+		MaxHeartbeat             time.Duration
+		MaxHeartbeatTimeoutTimes int
+		SessionExpireTime        time.Duration
+	}
+	Security struct {
+		PublicKey    string
+		PrivateKey   string
+		AesKeyLength int
+	}
+	Net struct {
+		ConnectServerBindIp   string
+		ConnectServerBindPort int
+	}
+}
+
+func load() *ccObj {
+	filename := "push.conf"
+	_, err := os.Stat(filename)
+	if err != nil {
+		log.Fatalf("load config.yml error. %v", err)
+	}
+
+	cfg := configuration.LoadConfig(filename)
+	CC := ccObj{}
+
+	CC.Core.MinHeartbeat = cfg.GetTimeDuration("mp.core.min-heartbeat")
+	CC.Core.MaxHeartbeat = cfg.GetTimeDuration("mp.core.max-heartbeat")
+	CC.Core.MaxHeartbeatTimeoutTimes = int(cfg.GetInt32("mp.core.max-hb-timeout-times"))
+	CC.Core.SessionExpireTime = cfg.GetTimeDuration("mp.core.session-expired-time")
+
+	CC.Security.PublicKey = cfg.GetString("mp.security.public-key")
+	CC.Security.PrivateKey = cfg.GetString("mp.security.private-key")
+	CC.Security.AesKeyLength = int(cfg.GetInt32("mp.security.aes-key-length"))
+
+	CC.Net.ConnectServerBindPort = int(cfg.GetInt32("mp.net.connect-server-port"))
+	CC.Net.ConnectServerBindIp = cfg.GetString("mp.net.connect-server-bind-ip")
+
+	fmt.Printf("config: %+v", CC)
+	return &CC
+}
 
 var (
 	MinHeartbeat             = 5 * time.Second
 	MaxHeartbeat             = 5 * time.Second
-	AesKeyLength             = 16
 	SessionExpireTime        = 10 * time.Second
 	MaxHeartbeatTimeoutTimes = 3 //心跳检测，超时重试次数
+	AesKeyLength             = 16
 	PublicKey                = `
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZsfv1qscqYdy4vY+P4e3cAtmv

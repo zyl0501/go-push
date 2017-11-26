@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	CipherBoxIns = CipherBox{AesKeyLength: config.AesKeyLength}
+	CipherBoxIns = CipherBox{AesKeyLength: config.CC.Security.AesKeyLength}
 )
 
 type CipherBox struct {
@@ -22,7 +22,7 @@ type CipherBox struct {
 
 func (cb *CipherBox) PublicKey() (*rsa.PublicKey, error) {
 	if cb.publicKey == nil {
-		block, _ := pem.Decode([]byte(config.PublicKey))
+		block, _ := pem.Decode([]byte(config.CC.Security.PublicKey))
 		if block == nil {
 			return nil, errors.New("public key error")
 		}
@@ -37,7 +37,7 @@ func (cb *CipherBox) PublicKey() (*rsa.PublicKey, error) {
 
 func (cb *CipherBox) PrivateKey() (*rsa.PrivateKey, error) {
 	if cb.privateKey == nil {
-		block, _ := pem.Decode([]byte(config.PrivateKey))
+		block, _ := pem.Decode([]byte(config.CC.Security.PrivateKey))
 		if block == nil {
 			return nil, errors.New("private key error!")
 		}

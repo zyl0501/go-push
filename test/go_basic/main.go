@@ -12,6 +12,7 @@ import (
 	"crypto/rand"
 	"math/big"
 	"github.com/zyl0501/go-push/test/go_basic/ctx"
+	"github.com/zyl0501/go-push/test/go_basic/fun"
 )
 
 const (
@@ -73,7 +74,10 @@ func main() {
 	//time.Sleep(20 * time.Second)
 
 	ctx.ContextTest3()
+	//times.TimeTest()
+	fun.FunPtrTest()
 }
+
 func mapTest() {
 	var pc map[string]string
 	pc = make(map[string]string)

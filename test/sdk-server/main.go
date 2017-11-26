@@ -6,10 +6,14 @@ import (
 	push2 "github.com/zyl0501/go-push/api/push"
 	"strconv"
 	"fmt"
+	log "github.com/alecthomas/log4go"
+	"github.com/zyl0501/go-push/tools/config"
 )
 
 func main() {
 	pushClient := push.PushClient{}
+	log.Debug("%+v",config.CC.Security)
+	log.Debug(config.CC.Security.PrivateKey)
 	pushClient.Init()
 	pushClient.Start()
 
