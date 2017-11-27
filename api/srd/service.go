@@ -32,6 +32,7 @@ type ServiceNode struct {
 	NodeId      string
 	Host        string
 	Port        int
+	IsPersistent bool
 }
 
 func (node *ServiceNode) HostAndPort() string {
@@ -47,5 +48,4 @@ func (node *ServiceNode) NodePath() string {
 
 type ServiceNodeFunc interface {
 	GetAttr(string) interface{}
-	IsPersistent() bool
 }
