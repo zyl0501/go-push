@@ -26,6 +26,10 @@ type ccObj struct {
 		ConnectServerBindIp   string
 		ConnectServerBindPort int
 	}
+	ZK struct{
+		ServerAddress string
+		SessionTimeout time.Duration
+	}
 }
 
 func load() *ccObj {
@@ -49,6 +53,9 @@ func load() *ccObj {
 
 	CC.Net.ConnectServerBindPort = int(cfg.GetInt32("mp.net.connect-server-port"))
 	CC.Net.ConnectServerBindIp = cfg.GetString("mp.net.connect-server-bind-ip")
+
+	CC.ZK.ServerAddress = cfg.GetString("mp.zk.server-address")
+	CC.ZK.SessionTimeout = cfg.GetTimeDuration("mp.zk.sessionTimeoutMs")
 
 	fmt.Printf("config: %+v", CC)
 	return &CC

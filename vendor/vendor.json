@@ -56,6 +56,24 @@
 			"revisionTime": "2017-10-24T15:42:51Z"
 		},
 		{
+			"checksumSHA1": "5m2HTnwsm8CPNXPOi+/q4wB9x7Q=",
+			"path": "github.com/samuel/go-zookeeper",
+			"revision": "471cd4e61d7a78ece1791fa5faa0345dc8c7d5a5",
+			"revisionTime": "2017-11-17T18:40:27Z"
+		},
+		{
+			"checksumSHA1": "2QF7CWOXx5+h7bzQLkFe/bOOht0=",
+			"path": "github.com/samuel/go-zookeeper/zk",
+			"revision": "471cd4e61d7a78ece1791fa5faa0345dc8c7d5a5",
+			"revisionTime": "2017-11-17T18:40:27Z"
+		},
+		{
+			"checksumSHA1": "HUXE+Nrcau8FSaVEvPYHMvDjxOE=",
+			"path": "github.com/satori/go.uuid",
+			"revision": "5bf94b69c6b68ee1b541973bb8e1144db23a194b",
+			"revisionTime": "2017-03-21T23:07:31Z"
+		},
+		{
 			"path": "golang.org/x",
 			"revision": ""
 		},
