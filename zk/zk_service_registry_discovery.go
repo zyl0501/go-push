@@ -90,13 +90,16 @@ func (server *ZKServiceRegistryAndDiscovery) Subscribe(watchPath string, ch chan
 					continue
 				}
 			}
-			<-watch
+			event :=<-watch
+			log.Debug("receive path=%v, event=%v", watchPath, event)
 			nodeMap := server.nodeInfoMap[watchPath]
 			if nodeMap == nil {
 				nodeMap = make(map[string]srd.ServiceNode)
 				server.nodeInfoMap[watchPath] = nodeMap
 			}
 			existMap := map[string]bool{}
+
+			nodes, _, _ = server.conn.Children(watchPath)
 
 			// handle new add nodes
 			for _, node := range nodes {
