@@ -24,11 +24,9 @@ import (
 	log "github.com/alecthomas/log4go"
 	"errors"
 	"github.com/samuel/go-zookeeper/zk"
-	"os"
-	"path"
-	"strings"
-	"syscall"
 	"time"
+	"strings"
+	"path"
 )
 
 var (
@@ -38,7 +36,7 @@ var (
 )
 
 // Connect connect to zookeeper, and start a goroutine log the event.
-func Connect(addr []string, timeout time.Duration) (*zk.Conn, error) {
+func connect(addr []string, timeout time.Duration) (*zk.Conn, error) {
 	conn, session, err := zk.Connect(addr, timeout)
 	if err != nil {
 		log.Error("zk.Connect(\"%v\", %d) error(%v)", addr, timeout, err)
@@ -47,66 +45,48 @@ func Connect(addr []string, timeout time.Duration) (*zk.Conn, error) {
 	go func() {
 		for {
 			event := <-session
-			log.Debug("zookeeper get a event: %s", event.State.String())
+			log.Debug("zookeeper get a session event: %s", event.State.String())
 		}
 	}()
 	return conn, nil
 }
 
-// Create create zookeeper path, if path exists ignore error
-func Create(conn *zk.Conn, fpath string) error {
-	// create zk root path
-	tpath := ""
-	for _, str := range strings.Split(fpath, "/")[1:] {
-		tpath = path.Join(tpath, "/", str)
-		log.Debug("create zookeeper path: \"%s\"", tpath)
-		_, err := conn.Create(tpath, []byte(""), 0, zk.WorldACL(zk.PermAll))
-		if err != nil {
-			if err == zk.ErrNodeExists {
-				log.Warn("zk.create(\"%s\") exists", tpath)
-			} else {
-				log.Error("zk.create(\"%s\") error(%v)", tpath, err)
-				return err
-			}
-		}
+func getData(conn *zk.Conn, path string) []byte {
+	data, _, err := conn.Get(path)
+	if err != nil {
+		log.Error("getData:%s, err=%v", path, err)
+	}else{
+		log.Debug("getData success. path=%s, data=%s", path, string(data))
 	}
-
-	return nil
+	return data
 }
 
-// RegisterTmp create a ephemeral node, and watch it, if node droped then send a SIGQUIT to self.
-func RegisterTemp(conn *zk.Conn, fpath string, data []byte) error {
-	tpath, err := conn.Create(path.Join(fpath)+"/", data, zk.FlagEphemeral|zk.FlagSequence, zk.WorldACL(zk.PermAll))
+/**
+* 获取子节点
+*
+* @param key
+* @return
+*/
+func getNodes(conn *zk.Conn, path string) ([]string) {
+	nodes, stat, err := conn.Children(path)
 	if err != nil {
-		log.Error("conn.Create(\"%s\", \"%s\", zk.FlagEphemeral|zk.FlagSequence) error(%v)", fpath, string(data), err)
-		return err
-	}
-	log.Debug("create a zookeeper node:%s", tpath)
-	// watch self
-	go func() {
-		for {
-			log.Info("zk path: \"%s\" set a watch", tpath)
-			exist, _, watch, err := conn.ExistsW(tpath)
-			if err != nil {
-				log.Error("zk.ExistsW(\"%s\") error(%v)", tpath, err)
-				log.Warn("zk path: \"%s\" set watch failed, kill itself", tpath)
-				killSelf()
-				return
-			}
-			if !exist {
-				log.Warn("zk path: \"%s\" not exist, kill itself", tpath)
-				killSelf()
-				return
-			}
-			event := <-watch
-			log.Info("zk path: \"%s\" receive a event %v", tpath, event)
+		if err == zk.ErrNoNode {
+			return nil
 		}
-	}()
-	return nil
+		log.Error("zk.Children(\"%s\") error(%v)", path, err)
+		return nil
+	}
+	if stat == nil {
+		return nil
+	}
+	if len(nodes) == 0 {
+		return nil
+	}
+	return nodes
 }
 
 // GetNodesW get all child from zk path with a watch.
-func GetNodesW(conn *zk.Conn, path string) ([]string, <-chan zk.Event, error) {
+func getNodesW(conn *zk.Conn, path string) ([]string, <-chan zk.Event, error) {
 	nodes, stat, watch, err := conn.ChildrenW(path)
 	if err != nil {
 		if err == zk.ErrNoNode {
@@ -124,28 +104,109 @@ func GetNodesW(conn *zk.Conn, path string) ([]string, <-chan zk.Event, error) {
 	return nodes, watch, nil
 }
 
-// GetNodes get all child from zk path.
-func GetNodes(conn *zk.Conn, path string) ([]string, error) {
-	nodes, stat, err := conn.Children(path)
+/**
+ * 删除节点
+ */
+func remove(conn *zk.Conn, path string) error {
+	err := conn.Delete(path, -1)
 	if err != nil {
-		if err == zk.ErrNoNode {
-			return nil, ErrNodeNotExist
-		}
-		log.Error("zk.Children(\"%s\") error(%v)", path, err)
-		return nil, err
+		log.Error("removeAndClose:%s, err=%v", path, err)
 	}
-	if stat == nil {
-		return nil, ErrNodeNotExist
-	}
-	if len(nodes) == 0 {
-		return nil, ErrNoChild
-	}
-	return nodes, nil
+	return err
 }
 
-// killSelf send a SIGQUIT to self.
-func killSelf() {
-	if err := syscall.Kill(os.Getpid(), syscall.SIGQUIT); err != nil {
-		log.Error("syscall.Kill(%d, SIGQUIT) error(%v)", os.Getpid(), err)
+/**
+ * 持久化数据
+ *
+ * @param key
+ * @param value
+ */
+func registerPersist(conn *zk.Conn, key string, value []byte) error {
+	if isExisted(conn, key) {
+		return update(conn, key, value);
+	} else {
+		// create zk root path
+		tpath := ""
+		for _, str := range strings.Split(key, "/")[:] {
+			tpath = path.Join(tpath, "/", str)
+			if isExisted(conn, tpath) {
+				continue
+			}
+			log.Debug("create zookeeper path: \"%s\"", tpath)
+			_, err := conn.Create(tpath, []byte(""), 0, zk.WorldACL(zk.PermAll))
+			if err != nil {
+				if err == zk.ErrNodeExists {
+					log.Warn("zk.create(\"%s\") exists", tpath)
+				} else {
+					log.Error("zk.create(\"%s\") error(%v)", tpath, err)
+					return err
+				}
+			}
+		}
+		return nil
+	}
+}
+
+/**
+ * 注册临时数据
+ *
+ * @param key
+ * @param value
+ */
+func registerEphemeral(conn *zk.Conn, key string, value []byte, cacheNode bool) error {
+	if isExisted(conn, key) {
+		return update(conn, key, value);
+	} else {
+		// create zk root path
+		tpath := ""
+		for _, str := range strings.Split(key, "/")[:] {
+			tpath = path.Join(tpath, "/", str)
+			//if isExisted(conn, tpath){
+			//	continue
+			//}
+			log.Debug("create zookeeper path: \"%s\"", tpath)
+			_, err := conn.Create(tpath, []byte(""), zk.FlagEphemeral, zk.WorldACL(zk.PermAll))
+			if err != nil {
+				if err == zk.ErrNodeExists {
+					log.Warn("zk.create(\"%s\") exists", tpath)
+				} else {
+					log.Error("zk.create(\"%s\") error(%v)", tpath, err)
+					return err
+				}
+			}
+		}
+		return update(conn, key, value);
+	}
+}
+
+/**
+ * 更新数据
+ *
+ * @param key
+ * @param value
+ */
+func update(conn *zk.Conn, key string, value []byte) error {
+	_, err := conn.Set(key, value, -1)
+	if err != nil {
+		log.Debug("update:%s, err=%v", key, err)
+	} else {
+		log.Debug("update success, key=%s, value=%s", key, string(value))
+	}
+	return err
+}
+
+/**
+ * 判断路径是否存在
+ *
+ * @param key
+ * @return
+ */
+func isExisted(conn *zk.Conn, key string) bool {
+	exist, _, err := conn.Exists(key)
+	if err != nil {
+		log.Warn("check node %s exist error.", key)
+		return false
+	} else {
+		return exist
 	}
 }

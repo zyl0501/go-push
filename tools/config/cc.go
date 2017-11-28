@@ -33,31 +33,30 @@ type ccObj struct {
 }
 
 func load() *ccObj {
+	CC := ccObj{}
 	filename := "push.conf"
 	_, err := os.Stat(filename)
 	if err != nil {
-		log.Fatalf("load config.yml error. %v", err)
+		log.Println("load %s error. %v", filename, err)
+	}else {
+		cfg := configuration.LoadConfig(filename)
+		CC.Core.MinHeartbeat = cfg.GetTimeDuration("mp.core.min-heartbeat")
+		CC.Core.MaxHeartbeat = cfg.GetTimeDuration("mp.core.max-heartbeat")
+		CC.Core.MaxHeartbeatTimeoutTimes = int(cfg.GetInt32("mp.core.max-hb-timeout-times"))
+		CC.Core.SessionExpireTime = cfg.GetTimeDuration("mp.core.session-expired-time")
+
+		CC.Security.PublicKey = cfg.GetString("mp.security.public-key")
+		CC.Security.PrivateKey = cfg.GetString("mp.security.private-key")
+		CC.Security.AesKeyLength = int(cfg.GetInt32("mp.security.aes-key-length"))
+
+		CC.Net.ConnectServerBindPort = int(cfg.GetInt32("mp.net.connect-server-port"))
+		CC.Net.ConnectServerBindIp = cfg.GetString("mp.net.connect-server-bind-ip")
+
+		CC.ZK.ServerAddress = cfg.GetString("mp.zk.server-address")
+		CC.ZK.SessionTimeout = cfg.GetTimeDuration("mp.zk.sessionTimeoutMs")
+
+		fmt.Printf("config: %+v", CC)
 	}
-
-	cfg := configuration.LoadConfig(filename)
-	CC := ccObj{}
-
-	CC.Core.MinHeartbeat = cfg.GetTimeDuration("mp.core.min-heartbeat")
-	CC.Core.MaxHeartbeat = cfg.GetTimeDuration("mp.core.max-heartbeat")
-	CC.Core.MaxHeartbeatTimeoutTimes = int(cfg.GetInt32("mp.core.max-hb-timeout-times"))
-	CC.Core.SessionExpireTime = cfg.GetTimeDuration("mp.core.session-expired-time")
-
-	CC.Security.PublicKey = cfg.GetString("mp.security.public-key")
-	CC.Security.PrivateKey = cfg.GetString("mp.security.private-key")
-	CC.Security.AesKeyLength = int(cfg.GetInt32("mp.security.aes-key-length"))
-
-	CC.Net.ConnectServerBindPort = int(cfg.GetInt32("mp.net.connect-server-port"))
-	CC.Net.ConnectServerBindIp = cfg.GetString("mp.net.connect-server-bind-ip")
-
-	CC.ZK.ServerAddress = cfg.GetString("mp.zk.server-address")
-	CC.ZK.SessionTimeout = cfg.GetTimeDuration("mp.zk.sessionTimeoutMs")
-
-	fmt.Printf("config: %+v", CC)
 	return &CC
 }
 

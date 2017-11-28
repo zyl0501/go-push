@@ -78,6 +78,18 @@
 			"revision": ""
 		},
 		{
+			"path": "golang.org/x/blog/content/context/google",
+			"revision": ""
+		},
+		{
+			"path": "golang.org/x/blog/content/context/userip",
+			"revision": ""
+		},
+		{
+			"path": "golang.org/x/net/context",
+			"revision": ""
+		},
+		{
 			"path": "golang.org/x/sys/windows",
 			"revision": ""
 		},

@@ -2,37 +2,39 @@ package srd
 
 import (
 	"strconv"
-	"github.com/zyl0501/go-push/api/service"
 	"github.com/satori/go.uuid"
 )
 
 type ServiceRegistry interface {
-	service.Server
-
-	register(node ServiceNode)
-	deregister(node ServiceNode)
+	Register(node ServiceNode)
+	Deregister(node ServiceNode)
 }
 
 type ServiceDiscovery interface {
-	service.Server
-
 	Lookup(path string) []ServiceNode
-	Subscribe(path string, c chan ListenNode)
-	UnSubscribe(path string, c chan ListenNode)
+	Subscribe(path string, c chan<- ListenNode)
+	UnSubscribe(path string, c chan<- ListenNode)
 }
+
+var (
+	TypeServiceAdd     = 1
+	TypeServiceRemoved = 2
+	TypeServiceUpdated = 3
+)
 
 type ListenNode struct {
 	ServiceNode
 	Path string
+	Type int
 }
 
 type ServiceNode struct {
-	ServiceNodeFunc
-	ServiceName string
-	NodeId      string
-	Host        string
-	Port        int
+	ServiceName  string
+	NodeId       string
+	Host         string
+	Port         int
 	IsPersistent bool
+	Attrs map[string]interface{}
 }
 
 func (node *ServiceNode) HostAndPort() string {
@@ -46,6 +48,10 @@ func (node *ServiceNode) NodePath() string {
 	return node.ServiceName + "/" + node.NodeId
 }
 
-type ServiceNodeFunc interface {
-	GetAttr(string) interface{}
+func (node *ServiceNode) GetAttr(key string) interface{} {
+	if node.Attrs != nil {
+		return node.Attrs[key]
+	} else {
+		return nil
+	}
 }
