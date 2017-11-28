@@ -8,7 +8,6 @@ import (
 	"github.com/zyl0501/go-push/tools/config"
 	"encoding/json"
 	"github.com/zyl0501/go-push/tools/utils"
-	"time"
 )
 
 type ZKServiceRegistryAndDiscovery struct {
@@ -105,8 +104,6 @@ func (server *ZKServiceRegistryAndDiscovery) Subscribe(watchPath string, ch chan
 				if _, ok := nodeMap[node]; !ok {
 					serviceNode := &srd.ServiceNode{};
 					utils.FromJson(getData(server.conn, watchPath+"/"+node), serviceNode)
-					log.Debug("-=-=-=-=-=", nodeMap, node)
-					time.Sleep(200*time.Millisecond)
 					nodeMap[node] = *serviceNode
 					ch <- srd.NodeEvent{Node: nodeMap[node], Path: node, Type: srd.TypeServiceAdd}
 				}
