@@ -98,9 +98,9 @@ func getNodesW(conn *zk.Conn, path string) ([]string, <-chan zk.Event, error) {
 	if stat == nil {
 		return nil, nil, ErrNodeNotExist
 	}
-	if len(nodes) == 0 {
-		return nil, nil, ErrNoChild
-	}
+	//if len(nodes) == 0 {
+	//	return nil, nil, ErrNoChild
+	//}
 	return nodes, watch, nil
 }
 
