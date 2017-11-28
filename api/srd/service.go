@@ -5,6 +5,10 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+var(
+	SERVICE_NAME_GATEWAY_SERVER = "/cluster/gs"
+)
+
 type ServiceRegistry interface {
 	Register(node ServiceNode)
 	Deregister(node ServiceNode)
@@ -12,8 +16,8 @@ type ServiceRegistry interface {
 
 type ServiceDiscovery interface {
 	Lookup(path string) []ServiceNode
-	Subscribe(path string, c chan<- ListenNode)
-	UnSubscribe(path string, c chan<- ListenNode)
+	Subscribe(path string, c chan<- NodeEvent)
+	UnSubscribe(path string, c chan<- NodeEvent)
 }
 
 var (
@@ -22,8 +26,8 @@ var (
 	TypeServiceUpdated = 3
 )
 
-type ListenNode struct {
-	ServiceNode
+type NodeEvent struct {
+	Node ServiceNode
 	Path string
 	Type int
 }

@@ -10,11 +10,13 @@ import (
 	"github.com/zyl0501/go-push/common"
 	"github.com/zyl0501/go-push/sdk-server/push/handler"
 	"github.com/zyl0501/go-push/core/service"
+	"github.com/zyl0501/go-push/zk"
 )
 
 type PushClient struct {
 	connClient        *ConnectClient
 	messageDispatcher common.MessageDispatcher
+	discovery zk.ZKServiceRegistryAndDiscovery
 }
 
 func (client *PushClient) Init() {

@@ -1,10 +1,10 @@
 package main
 
 import (
-"fmt"
-"time"
+	"fmt"
+	"time"
 
-"github.com/samuel/go-zookeeper/zk"
+	"github.com/samuel/go-zookeeper/zk"
 )
 
 func main() {
@@ -12,13 +12,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	children, stat, ch, err := c.ChildrenW("/")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%+v %+v\n", children, stat)
+	//children, stat, ch, err := c.ChildrenW("/")
+	//if err != nil {
+	//	panic(err)
+	//}
+	//fmt.Printf("%+v %+v\n", children, stat)
+	//for {
+	//	e := <-ch
+	//	fmt.Printf("%+v\n", e)
+	//}
+
+	_, _, existCh, err := c.ExistsW("/tttt")
+	fmt.Println("err:%+v", err)
 	for {
-		e := <-ch
-		fmt.Printf("%+v\n", e)
+		event := <-existCh
+		time.Sleep(3 * time.Second)
+		fmt.Println("event:%+v", event)
 	}
 }

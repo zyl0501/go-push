@@ -20,7 +20,7 @@ func main() {
 	discovery.Start(nil)
 
 	wg.Add(1)
-	c := make(chan srd.ListenNode)
+	c := make(chan srd.NodeEvent)
 	discovery.Subscribe(PathTest, c)
 
 	go func() {
