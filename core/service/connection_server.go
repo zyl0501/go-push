@@ -69,7 +69,7 @@ func (server *ConnectionServer) Init() {
 
 func (server *ConnectionServer) listen() {
 	netListen, err := net.Listen("tcp",
-		config.CC.Net.ConnectServerBindIp+strconv.Itoa(config.CC.Net.ConnectServerBindPort))
+		config.CC.Net.ConnectServerBindIp+":"+strconv.Itoa(config.CC.Net.ConnectServerBindPort))
 	if err != nil {
 		log.Error(os.Stderr, "Fatal error: %s", err.Error())
 		os.Exit(1)

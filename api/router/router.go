@@ -7,9 +7,11 @@ const (
 	REMOTE byte = 2
 )
 
+type RouterType byte
+
 type LocalRouter struct {
 	Conn api.Conn
-	RouterType byte
+	Type RouterType
 }
 
 func (router *LocalRouter) GetClientType() byte{
@@ -18,5 +20,5 @@ func (router *LocalRouter) GetClientType() byte{
 
 type RemoteRouter struct {
 	Location ClientLocation
-	RouterType byte
+	Type RouterType
 }

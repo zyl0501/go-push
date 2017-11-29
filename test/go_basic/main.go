@@ -11,8 +11,7 @@ import (
 	"encoding/binary"
 	"crypto/rand"
 	"math/big"
-	"github.com/zyl0501/go-push/test/go_basic/ctx"
-	"github.com/zyl0501/go-push/test/go_basic/fun"
+	"github.com/zyl0501/go-push/test/go_basic/map"
 )
 
 const (
@@ -73,9 +72,10 @@ func main() {
 	//go timeTest(2)
 	//time.Sleep(20 * time.Second)
 
-	ctx.ContextTest3()
+	//ctx.ContextTest3()
 	//times.TimeTest()
-	fun.FunPtrTest()
+	//fun.FunPtrTest()
+	_map.MapTest()
 }
 
 func mapTest() {

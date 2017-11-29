@@ -24,6 +24,7 @@ func NewPushServer() *MPushServer {
 }
 
 func (pushServer *MPushServer) Init() {
+	pushServer.PushCenter.Init()
 	pushServer.ConnectionServer.Init()
 	pushServer.GatewayServer.Init()
 }

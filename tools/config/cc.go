@@ -8,6 +8,11 @@ import (
 	"log"
 )
 
+var (
+	DEFAULT_CONNECT_SERVER_IP   = "127.0.0.1"
+	DEFAULT_CONNECT_SERVER_PORT = 9999
+)
+
 var CC = load()
 
 type ccObj struct {
@@ -26,8 +31,8 @@ type ccObj struct {
 		ConnectServerBindIp   string
 		ConnectServerBindPort int
 	}
-	ZK struct{
-		ServerAddress string
+	ZK struct {
+		ServerAddress  string
 		SessionTimeout time.Duration
 	}
 }
@@ -38,7 +43,10 @@ func load() *ccObj {
 	_, err := os.Stat(filename)
 	if err != nil {
 		log.Println("load %s error. %v", filename, err)
-	}else {
+
+		CC.Net.ConnectServerBindPort = DEFAULT_CONNECT_SERVER_PORT
+		CC.Net.ConnectServerBindIp = DEFAULT_CONNECT_SERVER_IP
+	} else {
 		cfg := configuration.LoadConfig(filename)
 		CC.Core.MinHeartbeat = cfg.GetTimeDuration("mp.core.min-heartbeat")
 		CC.Core.MaxHeartbeat = cfg.GetTimeDuration("mp.core.max-heartbeat")
@@ -49,8 +57,8 @@ func load() *ccObj {
 		CC.Security.PrivateKey = cfg.GetString("mp.security.private-key")
 		CC.Security.AesKeyLength = int(cfg.GetInt32("mp.security.aes-key-length"))
 
-		CC.Net.ConnectServerBindPort = int(cfg.GetInt32("mp.net.connect-server-port"))
-		CC.Net.ConnectServerBindIp = cfg.GetString("mp.net.connect-server-bind-ip")
+		CC.Net.ConnectServerBindPort = int(cfg.GetInt32("mp.net.connect-server-port", int32(DEFAULT_CONNECT_SERVER_PORT)))
+		CC.Net.ConnectServerBindIp = cfg.GetString("mp.net.connect-server-bind-ip", DEFAULT_CONNECT_SERVER_IP)
 
 		CC.ZK.ServerAddress = cfg.GetString("mp.zk.server-address")
 		CC.ZK.SessionTimeout = cfg.GetTimeDuration("mp.zk.sessionTimeoutMs")

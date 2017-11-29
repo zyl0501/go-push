@@ -24,12 +24,12 @@ func (center *PushCenter) StartFunc(ch chan service.Result) {
 	if ch != nil {
 		ch <- service.Result{Success: true}
 	}
+	log.Info("push center start success");
 	for {
 		select {
 		case msg, ok := <-center.msgQueue:
-			log.Debug(ok)
 			if ok {
-				log.Debug("receive server sdk push, now push to client")
+				log.Info("receive server sdk push, now push to client")
 				userId := msg.UserId
 				//broadcast
 				if userId == "" {
@@ -69,6 +69,7 @@ func (center *PushCenter) StopFunc(ch chan service.Result) {
 	if ch != nil {
 		ch <- service.Result{Success: true}
 	}
+	log.Info("push center stop success")
 }
 
 func sendPush(conn api.Conn, msg message.PushUpMessage) {

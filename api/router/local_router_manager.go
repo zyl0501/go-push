@@ -5,6 +5,7 @@ import (
 )
 
 type LocalRouterManager struct {
+	//key:string, value:LocalRouter
 	routers cmap.ConcurrentMap
 }
 
@@ -13,7 +14,8 @@ func NewLocalRouterManager() *LocalRouterManager {
 	return &manager
 }
 
-func (manager *LocalRouterManager) Register(userId string, router LocalRouter) {
+func (manager *LocalRouterManager) Register(userId string, router LocalRouter) *LocalRouter {
+	var oldRouter *LocalRouter
 	cb := func(exist bool, valueInMap interface{}, newValue interface{}) interface{} {
 		var childMap map[byte]LocalRouter
 		if exist {
@@ -21,17 +23,23 @@ func (manager *LocalRouterManager) Register(userId string, router LocalRouter) {
 		} else {
 			childMap = make(map[byte]LocalRouter)
 		}
+		if r, ok := childMap[router.GetClientType()]; ok {
+			oldRouter = &r
+		}
 		childMap[router.GetClientType()] = router
 		return childMap
 	}
 	manager.routers.Upsert(userId, router, cb)
+	return oldRouter
 }
 
-func (manager *LocalRouterManager) UnRegister(userId string, clientType byte) {
+func (manager *LocalRouterManager) UnRegister(userId string, clientType byte) bool {
 	childMap, ok := manager.routers.Get(userId)
 	if ok && childMap != nil {
 		delete(childMap.(map[byte]LocalRouter), clientType)
+		return true
 	}
+	return false
 }
 
 func (manager *LocalRouterManager) LookupAll(userId string) ([]LocalRouter) {
